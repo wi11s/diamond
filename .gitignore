@@ -1,3 +1,103 @@
+# Logs
+logs
+*.log
+*.log.*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Node.js
+node_modules/
+lib-cov
+coverage/
+.nyc_output/
+.eslintcache
+.stylelintcache
+.npm/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
+!.env.example
+!.env.*.example
+.envrc
+.direnv/
+
+# Next.js
+.next/
+out/
+
+# Build output
+dist/
+build/
+
+# Caches
+.cache/
+.turbo/
+.swc/
+.parcel-cache/
+
+# Editors and IDEs
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.swp
+
+# TypeScript
+*.tsbuildinfo
+
+# OS - macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Yarn (Berry)
+.pnp.*
+.yarn/install-state.gz
+
+# Misc
+*.orig
+*.rej
+*.patch
+*.diff
+*.pem
+*.key
+*.crt
+
+# Hosting / tooling
+.vercel/
+.netlify/
+firebase-debug.log
+firebase-debug.*
+.sass-cache/
+
+# Cypress
+cypress/videos/
+cypress/screenshots/
+
+# Storybook
+storybook-static/
+
+# Local databases
+*.sqlite
+*.sqlite-journal
+
+# Node REPL
+.node_repl_history
 .env
 .env.local
 .env.development.local
