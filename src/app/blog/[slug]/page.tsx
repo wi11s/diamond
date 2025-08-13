@@ -5,9 +5,9 @@ import { Calendar, Clock, Tag, ArrowLeft } from 'lucide-react'
 import { getPostBySlug, getAllPosts } from '@/lib/blog'
 
 interface BlogPostPageProps {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
 
 export async function generateStaticParams() {
@@ -18,7 +18,8 @@ export async function generateStaticParams() {
 }
 
 export default async function BlogPost({ params }: BlogPostPageProps) {
-  const post = await getPostBySlug(params.slug)
+  const { slug } = await params
+  const post = await getPostBySlug(slug)
 
   if (!post) {
     notFound()
@@ -122,16 +123,16 @@ export default async function BlogPost({ params }: BlogPostPageProps) {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                href="/photos"
+                href="/"
                 className="bg-gradient-to-r from-blue-500 to-purple-500 px-6 py-3 rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all"
               >
-                View Portfolio
+                View Gallery
               </Link>
               <Link
-                href="/about"
+                href="/blog"
                 className="border border-white/30 px-6 py-3 rounded-lg hover:bg-white/10 transition-all"
               >
-                Learn More
+                More Stories
               </Link>
             </div>
           </div>

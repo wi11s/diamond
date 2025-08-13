@@ -6,12 +6,12 @@ import Navigation from '@/components/Navigation'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Taylor Diamond - Portfolio',
+  title: 'Taylor Diamond',
   description: 'Photographer, creative, and storyteller. Explore my work.',
   keywords: 'photography, portfolio, creative, blog, Taylor Diamond',
   authors: [{ name: 'Taylor Diamond' }],
   openGraph: {
-    title: 'Taylor Diamond - Portfolio',
+    title: 'Taylor Diamond',
     description: 'Photographer, creative, and storyteller. Explore my work.',
     type: 'website',
   },

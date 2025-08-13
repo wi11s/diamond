@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
-import { X, ChevronLeft, ChevronRight, Download } from 'lucide-react'
+import { X, ArrowLeft, ArrowRight, ArrowUp, ArrowDown } from 'lucide-react'
 
 interface Photo {
   id: string
@@ -20,155 +20,362 @@ interface PhotoGalleryProps {
 }
 
 export default function PhotoGallery({ photos, categories = [] }: PhotoGalleryProps) {
-  const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null)
-  const [selectedCategory, setSelectedCategory] = useState<string>('all')
-  const [filteredPhotos, setFilteredPhotos] = useState<Photo[]>(photos)
+  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0)
+  const [currentSection, setCurrentSection] = useState(0) // 0 = all, 1+ = category index
+  const [showInfo, setShowInfo] = useState(false)
+  const [panPosition, setPanPosition] = useState({ x: 0, y: 0 })
+  const [isDragging, setIsDragging] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
 
+  // Disable page scrolling when gallery is active
   useEffect(() => {
-    if (selectedCategory === 'all') {
-      setFilteredPhotos(photos)
-    } else {
-      setFilteredPhotos(photos.filter(photo => photo.category === selectedCategory))
+    document.body.style.overflow = 'hidden'
+    document.documentElement.style.overflow = 'hidden'
+    
+    return () => {
+      document.body.style.overflow = ''
+      document.documentElement.style.overflow = ''
     }
-  }, [selectedCategory, photos])
+  }, [])
+
+  // Create sections: all photos + each category
+  const sections = [
+    { name: 'ALL', photos },
+    ...categories.map(category => ({
+      name: category,
+      photos: photos.filter(photo => photo.category === category)
+    }))
+  ]
+
+  const currentSectionData = sections[currentSection]
+  const currentPhotos = currentSectionData?.photos || []
 
   const nextPhoto = () => {
-    if (!selectedPhoto) return
-    const currentIndex = filteredPhotos.findIndex(photo => photo.id === selectedPhoto.id)
-    const nextIndex = (currentIndex + 1) % filteredPhotos.length
-    setSelectedPhoto(filteredPhotos[nextIndex])
+    if (currentPhotoIndex < currentPhotos.length - 1) {
+      setCurrentPhotoIndex(prev => prev + 1)
+    } else {
+      // Move to next section
+      if (currentSection < sections.length - 1) {
+        setCurrentSection(prev => prev + 1)
+        setCurrentPhotoIndex(0)
+      } else {
+        // Wrap to first section
+        setCurrentSection(0)
+        setCurrentPhotoIndex(0)
+      }
+    }
+    setPanPosition({ x: 0, y: 0 })
   }
 
   const prevPhoto = () => {
-    if (!selectedPhoto) return
-    const currentIndex = filteredPhotos.findIndex(photo => photo.id === selectedPhoto.id)
-    const prevIndex = (currentIndex - 1 + filteredPhotos.length) % filteredPhotos.length
-    setSelectedPhoto(filteredPhotos[prevIndex])
+    if (currentPhotoIndex > 0) {
+      setCurrentPhotoIndex(prev => prev - 1)
+    } else {
+      // Move to previous section
+      if (currentSection > 0) {
+        const prevSectionIndex = currentSection - 1
+        setCurrentSection(prevSectionIndex)
+        setCurrentPhotoIndex(sections[prevSectionIndex].photos.length - 1)
+      } else {
+        // Wrap to last section
+        const lastSectionIndex = sections.length - 1
+        setCurrentSection(lastSectionIndex)
+        setCurrentPhotoIndex(sections[lastSectionIndex].photos.length - 1)
+      }
+    }
+    setPanPosition({ x: 0, y: 0 })
+  }
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true)
+    const startX = e.clientX - panPosition.x
+    const startY = e.clientY - panPosition.y
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      if (!isDragging) return
+      
+      const newX = moveEvent.clientX - startX
+      const newY = moveEvent.clientY - startY
+      
+      // Constrain panning within reasonable bounds - horizontal only
+      const maxPan = 400
+      const constrainedX = Math.max(-maxPan, Math.min(maxPan, newX))
+      
+      setPanPosition({ x: constrainedX, y: 0 })
+
+      // Check for edge transitions
+      if (Math.abs(constrainedX) >= maxPan * 0.8) {
+        if (constrainedX > 0) {
+          prevPhoto()
+        } else {
+          nextPhoto()
+        }
+      }
+    }
+
+    const handleMouseUp = () => {
+      setIsDragging(false)
+      // Snap back to center unless transitioning
+      if (Math.abs(panPosition.x) < 320) {
+        setPanPosition({ x: 0, y: 0 })
+      }
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+    }
+
+    document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('mouseup', handleMouseUp)
+  }
+
+  const handleWheel = (e: WheelEvent) => {
+    e.preventDefault()
+    
+    // Horizontal scroll changes photos
+    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+      if (e.deltaX > 0) {
+        nextPhoto()
+      } else {
+        prevPhoto()
+      }
+    }
+    // Remove vertical scrolling/panning completely
   }
 
   useEffect(() => {
+    const container = containerRef.current
+    if (container) {
+      container.addEventListener('wheel', handleWheel, { passive: false })
+      return () => container.removeEventListener('wheel', handleWheel)
+    }
+  }, [panPosition])
+
+  useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
-      if (selectedPhoto) {
-        if (e.key === 'Escape') setSelectedPhoto(null)
-        if (e.key === 'ArrowRight') nextPhoto()
-        if (e.key === 'ArrowLeft') prevPhoto()
+      switch (e.key) {
+        case 'ArrowRight':
+        case 'd':
+          nextPhoto()
+          break
+        case 'ArrowLeft':
+        case 'a':
+          prevPhoto()
+          break
+        case 'ArrowUp':
+        case 'w':
+          // Remove vertical panning
+          break
+        case 'ArrowDown':
+        case 's':
+          // Remove vertical panning
+          break
+        case 'i':
+          setShowInfo(!showInfo)
+          break
+        case 'Escape':
+          setShowInfo(false)
+          setPanPosition({ x: 0, y: 0 })
+          break
+        case ' ':
+          e.preventDefault()
+          setPanPosition({ x: 0, y: 0 })
+          break
       }
     }
 
     window.addEventListener('keydown', handleKeyPress)
     return () => window.removeEventListener('keydown', handleKeyPress)
-  }, [selectedPhoto, filteredPhotos])
+  }, [showInfo, currentPhotos.length])
+
+  const currentPhoto = currentPhotos[currentPhotoIndex]
+  
+  // Get next photo data (could be from next section)
+  const getNextPhotoData = () => {
+    if (currentPhotoIndex < currentPhotos.length - 1) {
+      return currentPhotos[currentPhotoIndex + 1]
+    } else if (currentSection < sections.length - 1) {
+      return sections[currentSection + 1].photos[0]
+    } else {
+      return sections[0].photos[0]
+    }
+  }
+
+  // Get previous photo data (could be from previous section)
+  const getPrevPhotoData = () => {
+    if (currentPhotoIndex > 0) {
+      return currentPhotos[currentPhotoIndex - 1]
+    } else if (currentSection > 0) {
+      const prevSection = sections[currentSection - 1]
+      return prevSection.photos[prevSection.photos.length - 1]
+    } else {
+      const lastSection = sections[sections.length - 1]
+      return lastSection.photos[lastSection.photos.length - 1]
+    }
+  }
+
+  const nextPhotoData = getNextPhotoData()
+  const prevPhotoData = getPrevPhotoData()
+
+  if (!currentPhoto) return null
 
   return (
-    <div className="w-full">
-      {/* Category Filter */}
-      {categories.length > 0 && (
-        <div className="flex flex-wrap gap-3 mb-8 justify-center">
+    <div 
+      ref={containerRef}
+      className="fixed inset-0 bg-black overflow-hidden cursor-grab"
+      onMouseDown={handleMouseDown}
+      style={{ 
+        cursor: isDragging ? 'grabbing' : 'grab',
+        height: '100vh',
+        width: '100vw'
+      }}
+    >
+      {/* Main Photo with Panning */}
+      <motion.div 
+        className="absolute inset-0 w-full h-full"
+        animate={{ 
+          x: panPosition.x, 
+          y: 0,
+          scale: 1 + Math.abs(panPosition.x) * 0.0005
+        }}
+        transition={{ type: "tween", duration: isDragging ? 0 : 0.3 }}
+      >
+        <Image
+          key={currentPhoto.id}
+          src={currentPhoto.src}
+          alt={currentPhoto.alt}
+          fill
+          className="object-cover"
+          sizes="100vw"
+          quality={85}
+          priority
+        />
+        
+        {/* Dark overlay for text readability */}
+        <div className="absolute inset-0 bg-black/20" />
+      </motion.div>
+
+      {/* Edge Previews */}
+      {/* Left edge - Previous photo */}
+      <motion.div 
+        className="absolute top-0 left-0 w-32 h-full overflow-hidden"
+        animate={{ 
+          x: panPosition.x > 200 ? 0 : -128,
+          opacity: panPosition.x > 200 ? 1 : 0
+        }}
+        transition={{ duration: 0.3 }}
+      >
+        <Image
+          src={prevPhotoData.src}
+          alt={prevPhotoData.alt}
+          fill
+          className="object-cover object-right"
+          sizes="128px"
+          quality={75}
+        />
+      </motion.div>
+
+      {/* Right edge - Next photo */}
+      <motion.div 
+        className="absolute top-0 right-0 w-32 h-full overflow-hidden"
+        animate={{ 
+          x: panPosition.x < -200 ? 0 : 128,
+          opacity: panPosition.x < -200 ? 1 : 0
+        }}
+        transition={{ duration: 0.3 }}
+      >
+        <Image
+          src={nextPhotoData.src}
+          alt={nextPhotoData.alt}
+          fill
+          className="object-cover object-left"
+          sizes="128px"
+          quality={75}
+        />
+      </motion.div>
+
+      {/* Section Navigation - Minimal */}
+      <div className="fixed top-8 left-8 z-20 flex flex-col gap-2">
+        {sections.map((section, index) => (
           <button
-            onClick={() => setSelectedCategory('all')}
-            className={`px-4 py-2 rounded-full transition-all ${
-              selectedCategory === 'all'
-                ? 'bg-blue-500 text-white'
-                : 'glass-effect hover:bg-white/20'
+            key={section.name}
+            onClick={() => {
+              setCurrentSection(index)
+              setCurrentPhotoIndex(0)
+              setPanPosition({ x: 0, y: 0 })
+            }}
+            className={`px-3 py-1 text-xs font-mono uppercase tracking-wider transition-all ${
+              currentSection === index
+                ? 'text-white bg-white/20'
+                : 'text-white/60 hover:text-white/80'
             }`}
           >
-            All
+            {section.name}
           </button>
-          {categories.map((category) => (
-            <button
-              key={category}
-              onClick={() => setSelectedCategory(category)}
-              className={`px-4 py-2 rounded-full transition-all capitalize ${
-                selectedCategory === category
-                  ? 'bg-blue-500 text-white'
-                  : 'glass-effect hover:bg-white/20'
-              }`}
-            >
-              {category}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* Photo Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {filteredPhotos.map((photo, index) => (
-          <motion.div
-            key={photo.id}
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.4, delay: index * 0.05 }}
-            className="group cursor-pointer"
-            onClick={() => setSelectedPhoto(photo)}
-          >
-            <div className="relative aspect-square overflow-hidden rounded-lg">
-              <Image
-                src={photo.src}
-                alt={photo.alt}
-                fill
-                className="object-cover group-hover:scale-110 transition-transform duration-500"
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-              />
-              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                <span className="text-white font-medium">View</span>
-              </div>
-            </div>
-          </motion.div>
         ))}
       </div>
 
-      {/* Photo Modal */}
+      {/* Progress Indicator */}
+      <div className="fixed top-8 right-8 z-20 text-white font-mono text-sm">
+        <div className="text-right">
+          <div className="text-white/80 text-xs mb-1">{currentSectionData.name}</div>
+          <div>{String(currentPhotoIndex + 1).padStart(2, '0')} / {String(currentPhotos.length).padStart(2, '0')}</div>
+        </div>
+      </div>
+
+      {/* Photo Information */}
       <AnimatePresence>
-        {selectedPhoto && (
+        {showInfo && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4"
-            onClick={() => setSelectedPhoto(null)}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="fixed bottom-8 left-8 z-20 max-w-md"
           >
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              className="relative max-w-7xl max-h-full"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="relative">
-                <Image
-                  src={selectedPhoto.src}
-                  alt={selectedPhoto.alt}
-                  width={selectedPhoto.width}
-                  height={selectedPhoto.height}
-                  className="max-w-full max-h-[90vh] object-contain"
-                />
-                
-                {/* Controls */}
-                <button
-                  onClick={() => setSelectedPhoto(null)}
-                  className="absolute top-4 right-4 p-2 bg-black/50 rounded-full hover:bg-black/70 transition-colors"
-                >
-                  <X size={24} />
-                </button>
-                
-                <button
-                  onClick={prevPhoto}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 p-2 bg-black/50 rounded-full hover:bg-black/70 transition-colors"
-                >
-                  <ChevronLeft size={24} />
-                </button>
-                
-                <button
-                  onClick={nextPhoto}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 p-2 bg-black/50 rounded-full hover:bg-black/70 transition-colors"
-                >
-                  <ChevronRight size={24} />
-                </button>
+            <div className="bg-black/80 backdrop-blur-sm p-6 text-white">
+              <h2 className="text-2xl font-light mb-2 leading-tight">
+                {currentPhoto.alt}
+              </h2>
+              {currentPhoto.category && (
+                <p className="text-sm font-mono uppercase tracking-wider text-white/70 mb-4">
+                  {currentPhoto.category}
+                </p>
+              )}
+              <div className="text-xs font-mono text-white/50 space-y-1">
+                <p>Navigate through sections seamlessly</p>
+                <p>Drag or use arrow keys • Scroll to pan</p>
+                <p>Press I to toggle info • Space to center</p>
               </div>
-            </motion.div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Instruction hint */}
+      <motion.div
+        initial={{ opacity: 1 }}
+        animate={{ opacity: 0 }}
+        transition={{ delay: 4, duration: 1 }}
+        className="fixed bottom-8 right-8 z-20 text-white/50 font-mono text-xs text-right space-y-1"
+      >
+        <p>Navigate sections seamlessly</p>
+        <p>Drag to explore • I for info</p>
+      </motion.div>
+
+      {/* Section Transition Indicator */}
+      {(currentPhotoIndex === currentPhotos.length - 1 || currentPhotoIndex === 0) && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-20 text-white/60 font-mono text-xs text-center"
+        >
+          {currentPhotoIndex === currentPhotos.length - 1 && currentSection < sections.length - 1 && (
+            <p>→ Continue to {sections[currentSection + 1].name}</p>
+          )}
+          {currentPhotoIndex === 0 && currentSection > 0 && (
+            <p>← Back to {sections[currentSection - 1].name}</p>
+          )}
+        </motion.div>
+      )}
     </div>
   )
 }

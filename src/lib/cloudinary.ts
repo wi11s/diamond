@@ -25,7 +25,7 @@ export async function getImages(folder?: string): Promise<CloudinaryImage[]> {
   try {
     const results = await cloudinary.search
       .expression(folder ? `folder:${folder}` : 'resource_type:image')
-      .sort_by([['created_at', 'desc']])
+      .sort_by('created_at', 'desc')
       .max_results(50)
       .execute()
 
@@ -40,7 +40,7 @@ export async function getImagesByTag(tag: string): Promise<CloudinaryImage[]> {
   try {
     const results = await cloudinary.search
       .expression(`tags:${tag}`)
-      .sort_by([['created_at', 'desc']])
+      .sort_by('created_at', 'desc')
       .max_results(50)
       .execute()
 

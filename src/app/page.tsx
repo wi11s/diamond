@@ -1,116 +1,97 @@
 'use client'
 
-import { motion } from 'framer-motion'
-import Link from 'next/link'
-import { ArrowRight, Camera, User, BookOpen } from 'lucide-react'
-import Scene3D from '@/components/Scene3D'
+import PhotoGallery from '@/components/PhotoGallery'
 
-const fadeInUp = {
-  initial: { opacity: 0, y: 60 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.6 }
-}
-
-const staggerContainer = {
-  animate: {
-    transition: {
-      staggerChildren: 0.2
-    }
+// Mock data - replace with real Cloudinary data
+const mockPhotos = [
+  {
+    id: '1',
+    src: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=2400&h=1600&fit=crop&q=80',
+    alt: 'Mountain landscape at sunset',
+    width: 2400,
+    height: 1600,
+    category: 'LANDSCAPE'
+  },
+  {
+    id: '2', 
+    src: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=2400&h=1600&fit=crop&q=80',
+    alt: 'Portrait photography',
+    width: 2400,
+    height: 1600,
+    category: 'PORTRAIT'
+  },
+  {
+    id: '3',
+    src: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=2400&h=1600&fit=crop&q=80',
+    alt: 'Nature photography',
+    width: 2400,
+    height: 1600,
+    category: 'NATURE'
+  },
+  {
+    id: '4',
+    src: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=2400&h=1600&fit=crop&q=80',
+    alt: 'Street photography',
+    width: 2400,
+    height: 1600,
+    category: 'STREET'
+  },
+  {
+    id: '5',
+    src: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=2400&h=1600&fit=crop&q=80',
+    alt: 'Male portrait',
+    width: 2400,
+    height: 1600,
+    category: 'PORTRAIT'
+  },
+  {
+    id: '6',
+    src: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=2400&h=1600&fit=crop&q=80',
+    alt: 'Landscape view',
+    width: 2400,
+    height: 1600,
+    category: 'LANDSCAPE'
+  },
+  {
+    id: '7',
+    src: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=2400&h=1600&fit=crop&q=80',
+    alt: 'Ocean waves',
+    width: 2400,
+    height: 1600,
+    category: 'NATURE'
+  },
+  {
+    id: '8',
+    src: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=2400&h=1600&fit=crop&q=80',
+    alt: 'Urban architecture',
+    width: 2400,
+    height: 1600,
+    category: 'STREET'
+  },
+  {
+    id: '9',
+    src: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=1600&h=2400&fit=crop&q=80',
+    alt: 'Iceland landscape',
+    width: 1600,
+    height: 2400,
+    category: 'LANDSCAPE'
+  },
+  {
+    id: '10',
+    src: 'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=2400&h=1600&fit=crop&q=80',
+    alt: 'Street art',
+    width: 2400,
+    height: 1600,
+    category: 'STREET'
   }
-}
+]
+
+const categories = ['LANDSCAPE', 'PORTRAIT', 'NATURE', 'STREET']
 
 export default function Home() {
   return (
-    <div className="relative min-h-screen overflow-hidden">
-      <Scene3D />
-      
-      {/* Hero Section */}
-      <section className="relative z-10 min-h-screen flex items-center justify-center px-6">
-        <motion.div
-          variants={staggerContainer}
-          initial="initial"
-          animate="animate"
-          className="text-center max-w-4xl mx-auto"
-        >
-          <motion.h1
-            variants={fadeInUp}
-            className="text-6xl md:text-8xl font-bold mb-6 text-gradient"
-          >
-            Taylor Diamond
-          </motion.h1>
-          
-          <motion.p
-            variants={fadeInUp}
-            className="text-xl md:text-2xl mb-8 text-gray-300 max-w-2xl mx-auto"
-          >
-            Photographer, Creative, and Storyteller. 
-            Capturing moments that matter and sharing stories that inspire.
-          </motion.p>
-          
-          <motion.div
-            variants={fadeInUp}
-            className="flex flex-col sm:flex-row gap-4 justify-center items-center"
-          >
-            <Link
-              href="/photos"
-              className="glass-effect px-8 py-4 rounded-full flex items-center space-x-2 hover:bg-white/20 transition-all group"
-            >
-              <span>View My Work</span>
-              <ArrowRight className="group-hover:translate-x-1 transition-transform" size={20} />
-            </Link>
-            
-            <Link
-              href="/about"
-              className="border border-white/30 px-8 py-4 rounded-full hover:bg-white/10 transition-all"
-            >
-              Learn More
-            </Link>
-          </motion.div>
-        </motion.div>
-      </section>
-
-      {/* Quick Links Section */}
-      <section className="relative z-10 py-20 px-6">
-        <div className="max-w-6xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="grid md:grid-cols-3 gap-8"
-          >
-            <Link href="/photos" className="group">
-              <div className="glass-effect p-8 rounded-2xl hover:bg-white/20 transition-all group-hover:scale-105">
-                <Camera className="text-blue-400 mb-4 group-hover:scale-110 transition-transform" size={48} />
-                <h3 className="text-2xl font-bold mb-3">Photography</h3>
-                <p className="text-gray-400">
-                  Explore my collection of captured moments and visual stories.
-                </p>
-              </div>
-            </Link>
-
-            <Link href="/about" className="group">
-              <div className="glass-effect p-8 rounded-2xl hover:bg-white/20 transition-all group-hover:scale-105">
-                <User className="text-purple-400 mb-4 group-hover:scale-110 transition-transform" size={48} />
-                <h3 className="text-2xl font-bold mb-3">About Me</h3>
-                <p className="text-gray-400">
-                  Learn about my journey, passion, and creative process.
-                </p>
-              </div>
-            </Link>
-
-            <Link href="/blog" className="group">
-              <div className="glass-effect p-8 rounded-2xl hover:bg-white/20 transition-all group-hover:scale-105">
-                <BookOpen className="text-pink-400 mb-4 group-hover:scale-110 transition-transform" size={48} />
-                <h3 className="text-2xl font-bold mb-3">Blog</h3>
-                <p className="text-gray-400">
-                  Read my thoughts, tips, and stories from behind the lens.
-                </p>
-              </div>
-            </Link>
-          </motion.div>
-        </div>
-      </section>
+    <div className="min-h-screen relative">
+      <PhotoGallery photos={mockPhotos} categories={categories} />
     </div>
   )
 }
