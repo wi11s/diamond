@@ -31,10 +31,14 @@ export default function PhotoGallery({ photos, categories = [] }: PhotoGalleryPr
   useEffect(() => {
     document.body.style.overflow = 'hidden'
     document.documentElement.style.overflow = 'hidden'
+    document.documentElement.style.backgroundColor = '#000'
+    document.body.style.backgroundColor = '#000'
     
     return () => {
       document.body.style.overflow = ''
       document.documentElement.style.overflow = ''
+      document.documentElement.style.backgroundColor = ''
+      document.body.style.backgroundColor = ''
     }
   }, [])
 
@@ -130,15 +134,22 @@ export default function PhotoGallery({ photos, categories = [] }: PhotoGalleryPr
   const handleWheel = (e: WheelEvent) => {
     e.preventDefault()
     
-    // Horizontal scroll changes photos
+    // Both horizontal and vertical scroll change photos
     if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+      // Horizontal scroll
       if (e.deltaX > 0) {
         nextPhoto()
       } else {
         prevPhoto()
       }
+    } else {
+      // Vertical scroll
+      if (e.deltaY > 0) {
+        nextPhoto()
+      } else {
+        prevPhoto()
+      }
     }
-    // Remove vertical scrolling/panning completely
   }
 
   useEffect(() => {
@@ -162,11 +173,11 @@ export default function PhotoGallery({ photos, categories = [] }: PhotoGalleryPr
           break
         case 'ArrowUp':
         case 'w':
-          // Remove vertical panning
+          prevPhoto()
           break
         case 'ArrowDown':
         case 's':
-          // Remove vertical panning
+          nextPhoto()
           break
         case 'i':
           setShowInfo(!showInfo)
@@ -224,13 +235,15 @@ export default function PhotoGallery({ photos, categories = [] }: PhotoGalleryPr
       onMouseDown={handleMouseDown}
       style={{ 
         cursor: isDragging ? 'grabbing' : 'grab',
-        height: '100vh',
-        width: '100vw'
+        height: '100svh',
+        width: '100svw',
+        backgroundColor: '#000'
       }}
     >
       {/* Main Photo with Panning */}
       <motion.div 
         className="absolute inset-0 w-full h-full"
+        initial={{ x: 0, y: 0, scale: 1 }}
         animate={{ 
           x: panPosition.x, 
           y: 0,
@@ -257,6 +270,7 @@ export default function PhotoGallery({ photos, categories = [] }: PhotoGalleryPr
       {/* Left edge - Previous photo */}
       <motion.div 
         className="absolute top-0 left-0 w-32 h-full overflow-hidden"
+        initial={{ x: -128, opacity: 0 }}
         animate={{ 
           x: panPosition.x > 200 ? 0 : -128,
           opacity: panPosition.x > 200 ? 1 : 0
@@ -276,6 +290,7 @@ export default function PhotoGallery({ photos, categories = [] }: PhotoGalleryPr
       {/* Right edge - Next photo */}
       <motion.div 
         className="absolute top-0 right-0 w-32 h-full overflow-hidden"
+        initial={{ x: 128, opacity: 0 }}
         animate={{ 
           x: panPosition.x < -200 ? 0 : 128,
           opacity: panPosition.x < -200 ? 1 : 0
@@ -341,7 +356,7 @@ export default function PhotoGallery({ photos, categories = [] }: PhotoGalleryPr
               )}
               <div className="text-xs font-mono text-white/50 space-y-1">
                 <p>Navigate through sections seamlessly</p>
-                <p>Drag or use arrow keys • Scroll to pan</p>
+                <p>Scroll vertically or horizontally to navigate</p>
                 <p>Press I to toggle info • Space to center</p>
               </div>
             </div>
@@ -349,16 +364,7 @@ export default function PhotoGallery({ photos, categories = [] }: PhotoGalleryPr
         )}
       </AnimatePresence>
 
-      {/* Instruction hint */}
-      <motion.div
-        initial={{ opacity: 1 }}
-        animate={{ opacity: 0 }}
-        transition={{ delay: 4, duration: 1 }}
-        className="fixed bottom-8 right-8 z-20 text-white/50 font-mono text-xs text-right space-y-1"
-      >
-        <p>Navigate sections seamlessly</p>
-        <p>Drag to explore • I for info</p>
-      </motion.div>
+      
 
       {/* Section Transition Indicator */}
       {(currentPhotoIndex === currentPhotos.length - 1 || currentPhotoIndex === 0) && (

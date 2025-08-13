@@ -13,43 +13,26 @@ interface BlogCardProps {
 
 export default function BlogCard({ post, index = 0 }: BlogCardProps) {
   return (
-    <motion.article
-      initial={{ opacity: 0, y: 40, rotate: -5 }}
-      animate={{ opacity: 1, y: 0, rotate: 0 }}
-      transition={{ 
-        duration: 0.6, 
-        delay: index * 0.1,
-        type: "spring",
-        stiffness: 200
-      }}
-    >
+    <motion.article initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
       <Link href={`/blog/${post.slug}`} className="group block">
-        <motion.div
-          className="canvas-element overflow-hidden"
-          whileHover={{ 
-            scale: 1.05, 
-            rotate: index % 3 === 0 ? 2 : index % 3 === 1 ? -2 : 1,
-            transition: { duration: 0.3 }
-          }}
-        >
-          <div className="relative h-48 overflow-hidden rounded-xl mb-4">
+        <div className="border border-gray-200 overflow-hidden">
+          <div className="relative h-48 overflow-hidden mb-4">
             {post.coverImage ? (
               <Image
                 src={post.coverImage}
                 alt={post.title}
                 fill
-                className="object-cover group-hover:scale-110 transition-transform duration-500"
+                className="object-cover"
               />
             ) : (
-              <div className="w-full h-full bg-gradient-to-br from-blue-100 via-purple-50 to-pink-100 flex items-center justify-center">
-                <span className="text-gray-400 text-lg font-bold">No Image</span>
+              <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                <span className="text-gray-400 text-sm">No image</span>
               </div>
             )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           </div>
           
-          <div className="p-6">
-            <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
+          <div className="p-4">
+            <div className="flex items-center gap-4 text-xs text-gray-500 mb-3">
               <div className="flex items-center gap-1">
                 <Calendar size={14} />
                 <span className="font-medium">{new Date(post.date).toLocaleDateString()}</span>
@@ -60,11 +43,11 @@ export default function BlogCard({ post, index = 0 }: BlogCardProps) {
               </div>
             </div>
             
-            <h2 className="chunky-font text-2xl font-bold mb-4 text-gray-800 group-hover:text-blue-600 transition-colors line-clamp-2">
+            <h2 className="chunky-font text-xl font-medium mb-2 text-gray-900 line-clamp-2">
               {post.title}
             </h2>
             
-            <p className="text-gray-600 font-medium mb-6 line-clamp-3 leading-relaxed">
+            <p className="text-gray-600 mb-4 line-clamp-3 leading-relaxed text-sm">
               {post.excerpt}
             </p>
             
@@ -73,7 +56,7 @@ export default function BlogCard({ post, index = 0 }: BlogCardProps) {
                 {post.tags.slice(0, 2).map((tag, tagIndex) => (
                   <span
                     key={tag}
-                    className="inline-flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-full text-xs font-bold text-gray-700"
+                    className="inline-flex items-center gap-1 px-2 py-0.5 border border-gray-300 text-xs text-gray-700"
                   >
                     <Tag size={10} />
                     {tag}
@@ -81,12 +64,12 @@ export default function BlogCard({ post, index = 0 }: BlogCardProps) {
                 ))}
               </div>
               
-              <span className="font-bold text-blue-600 text-sm group-hover:underline">
-                READ MORE →
+              <span className="text-gray-700 text-sm">
+                Read more →
               </span>
             </div>
           </div>
-        </motion.div>
+        </div>
       </Link>
     </motion.article>
   )

@@ -3,17 +3,22 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
-import { Menu, X, Camera, User, BookOpen, Home, Palette, Calendar } from 'lucide-react'
+import { usePathname } from 'next/navigation'
+import { Menu, X, Camera, User, BookOpen, Home, Palette, Calendar, Instagram } from 'lucide-react'
 
 const navItems = [
   { href: '/', label: 'HOME', icon: Home, color: 'text-white' },
   { href: '/dates', label: 'DATES', icon: Calendar, color: 'text-white' },
   { href: '/blog', label: 'BLOG', icon: BookOpen, color: 'text-white' },
+  { href: 'https://www.instagram.com/its_taylor_diamond/', label: 'INSTAGRAM', icon: Instagram, color: 'text-white', external: true },
 ]
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const pathname = usePathname()
+  const isBlog = pathname?.startsWith('/blog')
+  const isHome = pathname === '/'
 
   useEffect(() => {
     const handleScroll = () => {
@@ -27,8 +32,8 @@ export default function Navigation() {
     <>
       {/* Desktop Navigation */}
       <motion.nav
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
+        initial={isHome ? false : { y: -100 }}
+        animate={isHome ? {} : { y: 0 }}
         className="fixed top-0 left-0 right-0 z-50 p-6"
       >
         <div className="max-w-7xl mx-auto flex justify-end items-center">
@@ -37,11 +42,25 @@ export default function Navigation() {
             {navItems.map((item, index) => (
               <motion.div
                 key={item.href}
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={isHome ? false : { opacity: 0, y: -20 }}
+                animate={isHome ? {} : { opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
               >
-                <Link href={item.href} className="group">
+                {item.external ? (
+                  <a href={item.href} target="_blank" rel="noopener noreferrer" className="group">
+                    <motion.div
+                      className="p-2"
+                      whileHover={{ 
+                        scale: 1.1,
+                        transition: { duration: 0.2 }
+                      }}
+                      whileTap={{ scale: 0.9 }}
+                    >
+                      <item.icon className={`${isBlog ? 'text-black hover:text-black/70' : 'text-white hover:text-white/80'} transition-colors`} size={24} />
+                    </motion.div>
+                  </a>
+                ) : (
+                  <Link href={item.href} className="group">
                   <motion.div
                     className="p-2"
                     whileHover={{ 
@@ -50,9 +69,10 @@ export default function Navigation() {
                     }}
                     whileTap={{ scale: 0.9 }}
                   >
-                    <item.icon className="text-white hover:text-white/80 transition-colors" size={24} />
+                    <item.icon className={`${isBlog ? 'text-black hover:text-black/70' : 'text-white hover:text-white/80'} transition-colors`} size={24} />
                   </motion.div>
-                </Link>
+                  </Link>
+                )}
               </motion.div>
             ))}
           </div>

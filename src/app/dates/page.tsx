@@ -1,191 +1,256 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Calendar, MapPin, Clock, Camera } from 'lucide-react'
+import { Calendar, MapPin, Clock, Music, Volume2, Users } from 'lucide-react'
 
-// Mock upcoming photography sessions and events
-const upcomingDates = [
+// Upcoming DJ sets and events
+const upcomingEvents = [
   {
     id: '1',
-    title: 'Golden Hour Portrait Session',
-    date: '2024-02-15',
-    time: '17:30',
-    location: 'Central Park, NYC',
-    type: 'portrait',
-    available: true
+    title: 'Midnight Warehouse Session',
+    date: '2024-02-16',
+    time: '23:00',
+    venue: 'Underground NYC',
+    location: 'Brooklyn, NY',
+    type: 'warehouse',
+    genre: 'Techno • Dark House',
+    capacity: '500',
+    status: 'confirmed'
   },
   {
     id: '2',
-    title: 'Wedding Photography',
-    date: '2024-02-18',
-    time: '14:00',
-    location: 'Brooklyn Bridge Park',
-    type: 'wedding',
-    available: false
+    title: 'Rooftop Sunset Vibes',
+    date: '2024-02-23',
+    time: '18:00',
+    venue: 'Sky Lounge',
+    location: 'Manhattan, NY',
+    type: 'rooftop',
+    genre: 'Deep House • Progressive',
+    capacity: '200',
+    status: 'confirmed'
   },
   {
     id: '3',
-    title: 'Street Photography Walk',
-    date: '2024-02-22',
-    time: '10:00',
-    location: 'SoHo District',
-    type: 'street',
-    available: true
+    title: 'Underground Friday',
+    date: '2024-03-01',
+    time: '22:00',
+    venue: 'The Basement',
+    location: 'Queens, NY',
+    type: 'club',
+    genre: 'Tech House • Minimal',
+    capacity: '300',
+    status: 'sold_out'
   },
   {
     id: '4',
-    title: 'Landscape Sunrise Shoot',
-    date: '2024-02-25',
-    time: '06:30',
-    location: 'Bear Mountain',
-    type: 'landscape',
-    available: true
+    title: 'Festival Main Stage',
+    date: '2024-03-08',
+    time: '20:00',
+    venue: 'Electric Dreams Festival',
+    location: 'Central Park, NY',
+    type: 'festival',
+    genre: 'Progressive House • Trance',
+    capacity: '5000',
+    status: 'confirmed'
   },
   {
     id: '5',
-    title: 'Corporate Headshots',
-    date: '2024-03-01',
-    time: '09:00',
-    location: 'Manhattan Studio',
-    type: 'corporate',
-    available: false
+    title: 'Late Night Sessions',
+    date: '2024-03-15',
+    time: '01:00',
+    venue: 'After Hours',
+    location: 'Brooklyn, NY',
+    type: 'afterparty',
+    genre: 'Melodic Techno • Deep',
+    capacity: '150',
+    status: 'private'
   },
   {
     id: '6',
-    title: 'Fashion Editorial',
-    date: '2024-03-05',
-    time: '13:00',
-    location: 'DUMBO Rooftop',
-    type: 'fashion',
-    available: true
+    title: 'Summer Kickoff Party',
+    date: '2024-03-22',
+    time: '19:00',
+    venue: 'Harbor Club',
+    location: 'Jersey City, NJ',
+    type: 'outdoor',
+    genre: 'House • Disco • Funk',
+    capacity: '800',
+    status: 'confirmed'
   }
 ]
 
-const getTypeColor = (type: string) => {
+const getEventColor = (type: string) => {
   switch (type) {
-    case 'portrait': return 'text-blue-400'
-    case 'wedding': return 'text-pink-400'
-    case 'street': return 'text-yellow-400'
-    case 'landscape': return 'text-green-400'
-    case 'corporate': return 'text-purple-400'
-    case 'fashion': return 'text-orange-400'
+    case 'warehouse': return 'text-red-400'
+    case 'rooftop': return 'text-orange-400'
+    case 'club': return 'text-purple-400'
+    case 'festival': return 'text-green-400'
+    case 'afterparty': return 'text-pink-400'
+    case 'outdoor': return 'text-blue-400'
     default: return 'text-white'
+  }
+}
+
+const getStatusInfo = (status: string) => {
+  switch (status) {
+    case 'confirmed': return { text: 'Confirmed', color: 'bg-green-500/20 text-green-400' }
+    case 'sold_out': return { text: 'Sold Out', color: 'bg-red-500/20 text-red-400' }
+    case 'private': return { text: 'Private', color: 'bg-yellow-500/20 text-yellow-400' }
+    default: return { text: 'TBA', color: 'bg-gray-500/20 text-gray-400' }
   }
 }
 
 export default function Dates() {
   return (
-    <div className="min-h-screen bg-black text-white overflow-auto">
-      <div className="max-w-4xl mx-auto px-6 py-24">
+    <div className="min-h-screen bg-black text-white overflow-auto relative">
+      {/* DIAMONDCUTZ Background */}
+      <div className="fixed inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 0.05, scale: 1 }}
+          transition={{ duration: 2 }}
+          className="text-[20vw] font-black leading-none select-none"
+          style={{
+            fontFamily: 'Arial Black, sans-serif',
+            letterSpacing: '-0.1em',
+            transform: 'rotate(-15deg)'
+          }}
+        >
+          DIAMONDCUTZ
+        </motion.div>
+      </div>
+
+      <div className="relative z-10 max-w-5xl mx-auto px-6 py-24">
         
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-16"
+          className="text-center mb-20"
         >
-          <div className="inline-flex items-center gap-3 mb-8">
-            <Calendar className="text-white" size={32} />
-            <h1 className="chunky-font text-4xl md:text-6xl font-light">
-              UPCOMING DATES
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1, delay: 0.3 }}
+            className="mb-8"
+          >
+            <h1 className="chunky-font text-6xl md:text-8xl font-black mb-4 bg-gradient-to-r from-white via-gray-300 to-white bg-clip-text text-transparent">
+              DIAMONDCUTZ
             </h1>
-          </div>
-          
-          <p className="text-white/70 text-lg max-w-2xl mx-auto leading-relaxed">
-            Photography sessions, workshops, and collaborative projects. 
-            Available dates are open for bookings.
-          </p>
+            <div className="flex items-center justify-center gap-4 text-white/60">
+              <Volume2 size={20} />
+              <span className="font-mono uppercase tracking-[0.3em] text-sm">
+                Upcoming Sets & Events
+              </span>
+              <Volume2 size={20} />
+            </div>
+          </motion.div>
         </motion.div>
 
-        {/* Dates Grid */}
-        <div className="space-y-6">
-          {upcomingDates.map((session, index) => (
-            <motion.div
-              key={session.id}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              className={`bg-black/40 backdrop-blur-sm border border-white/10 p-6 
-                         hover:border-white/20 transition-all duration-300 ${
-                           session.available ? 'hover:bg-white/5' : 'opacity-60'
-                         }`}
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-3">
-                    <Camera className={getTypeColor(session.type)} size={20} />
-                    <h3 className="text-xl font-light">
-                      {session.title}
-                    </h3>
-                    {!session.available && (
-                      <span className="px-2 py-1 bg-red-500/20 text-red-400 text-xs font-mono uppercase tracking-wider">
-                        Booked
-                      </span>
-                    )}
-                    {session.available && (
-                      <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs font-mono uppercase tracking-wider">
-                        Available
-                      </span>
-                    )}
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-white/60 text-sm font-mono">
-                    <div className="flex items-center gap-2">
-                      <Calendar size={16} />
-                      <span>{new Date(session.date).toLocaleDateString('en-US', { 
-                        weekday: 'short', 
-                        month: 'short', 
-                        day: 'numeric' 
-                      })}</span>
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      <Clock size={16} />
-                      <span>{session.time}</span>
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      <MapPin size={16} />
-                      <span>{session.location}</span>
+        {/* Events Grid */}
+        <div className="space-y-8">
+          {upcomingEvents.map((event, index) => {
+            const statusInfo = getStatusInfo(event.status)
+            
+            return (
+              <motion.div
+                key={event.id}
+                initial={{ opacity: 0, x: -40 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, delay: index * 0.15 }}
+                className="bg-black/60 backdrop-blur-sm border border-white/10 hover:border-white/30 
+                         transition-all duration-500 overflow-hidden group"
+              >
+                <div className="p-8">
+                  <div className="flex items-start justify-between mb-6">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-4 mb-4">
+                        <Music className={getEventColor(event.type)} size={24} />
+                        <h3 className="text-2xl md:text-3xl font-light">
+                          {event.title}
+                        </h3>
+                        <span className={`px-3 py-1 text-xs font-mono uppercase tracking-wider ${statusInfo.color}`}>
+                          {statusInfo.text}
+                        </span>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-white/70">
+                        <div className="flex items-center gap-3">
+                          <Calendar size={18} />
+                          <div>
+                            <div className="text-sm font-mono opacity-60">DATE</div>
+                            <div className="font-medium">
+                              {new Date(event.date).toLocaleDateString('en-US', { 
+                                weekday: 'short', 
+                                month: 'short', 
+                                day: 'numeric' 
+                              })}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-3">
+                          <Clock size={18} />
+                          <div>
+                            <div className="text-sm font-mono opacity-60">TIME</div>
+                            <div className="font-medium">{event.time}</div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-3">
+                          <MapPin size={18} />
+                          <div>
+                            <div className="text-sm font-mono opacity-60">VENUE</div>
+                            <div className="font-medium">{event.venue}</div>
+                            <div className="text-sm opacity-60">{event.location}</div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-3">
+                          <Users size={18} />
+                          <div>
+                            <div className="text-sm font-mono opacity-60">CAPACITY</div>
+                            <div className="font-medium">{event.capacity}</div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="mt-4 pt-4 border-t border-white/10">
+                        <div className="text-sm font-mono opacity-60 mb-1">SOUND</div>
+                        <div className="text-lg font-medium text-white/90">{event.genre}</div>
+                      </div>
                     </div>
                   </div>
                 </div>
                 
-                {session.available && (
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="px-4 py-2 border border-white/30 text-white/80 hover:bg-white/10 
-                             hover:text-white transition-all duration-200 text-sm font-mono uppercase tracking-wider"
-                  >
-                    Book
-                  </motion.button>
-                )}
-              </div>
-            </motion.div>
-          ))}
+                {/* Animated bottom bar */}
+                <div className="h-1 bg-gradient-to-r from-transparent via-white/20 to-transparent 
+                               transform scale-x-0 group-hover:scale-x-100 transition-transform duration-700" />
+              </motion.div>
+            )
+          })}
         </div>
 
-        {/* Contact Section */}
+        {/* Booking Section */}
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 0, y: 60 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.8 }}
-          className="text-center mt-16 pt-16 border-t border-white/10"
+          transition={{ duration: 1, delay: 1.2 }}
+          className="text-center mt-24 pt-16 border-t border-white/10"
         >
-          <h2 className="text-2xl font-light mb-4">
-            Don't see what you're looking for?
+          <h2 className="text-3xl font-light mb-6">
+            Book DIAMONDCUTZ
           </h2>
-          <p className="text-white/60 mb-8">
-            Custom sessions and collaborations always welcome.
+          <p className="text-white/60 mb-10 text-lg">
+            Available for private events, clubs, festivals, and collaborations.
           </p>
           <motion.a
-            href="mailto:taylor@example.com"
+            href="mailto:bookings@diamondcutz.com"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="inline-block px-8 py-3 border border-white text-white hover:bg-white 
-                     hover:text-black transition-all duration-300 font-mono uppercase tracking-wider"
+            className="inline-block px-12 py-4 border-2 border-white text-white hover:bg-white 
+                     hover:text-black transition-all duration-400 font-mono uppercase tracking-[0.2em] text-sm"
           >
             Get in Touch
           </motion.a>
