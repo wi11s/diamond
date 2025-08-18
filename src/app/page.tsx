@@ -1,57 +1,60 @@
-'use client'
-
 import PhotoGallery from '@/components/PhotoGallery'
+import { getPhotoShoots } from '@/lib/cloudinary'
 
-// Mock data - replace with real Cloudinary data
-const mockPhotos = [
+interface Photo {
+  id: string
+  src: string
+  alt: string
+  width: number
+  height: number
+}
+
+interface PhotoShoot {
+  name: string
+  photos: Photo[]
+}
+
+// Fallback mock data in case Cloudinary fails
+const fallbackPhotoShoots: PhotoShoot[] = [
   {
-    id: '1',
-    src: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=2400&h=1600&fit=crop&q=80',
-    alt: 'Mountain landscape at sunset',
-    width: 2400,
-    height: 1600
-  },
-  {
-    id: '2', 
-    src: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=2400&h=1600&fit=crop&q=80',
-    alt: 'Portrait photography',
-    width: 2400,
-    height: 1600
-  },
-  {
-    id: '3',
-    src: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=2400&h=1600&fit=crop&q=80',
-    alt: 'Nature photography',
-    width: 2400,
-    height: 1600
-  },
-  {
-    id: '4',
-    src: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=2400&h=1600&fit=crop&q=80',
-    alt: 'Street photography',
-    width: 2400,
-    height: 1600
-  },
-  {
-    id: '5',
-    src: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=2400&h=1600&fit=crop&q=80',
-    alt: 'Male portrait',
-    width: 2400,
-    height: 1600
-  },
-  {
-    id: '6',
-    src: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=2400&h=1600&fit=crop&q=80',
-    alt: 'Landscape view',
-    width: 2400,
-    height: 1600
+    name: 'Sample Portfolio',
+    photos: [
+      {
+        id: 'sample1',
+        src: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=2400&h=1600&fit=crop&q=80',
+        alt: 'Sample Photo 1',
+        width: 2400,
+        height: 1600
+      },
+      {
+        id: 'sample2',
+        src: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=2400&h=1600&fit=crop&q=80',
+        alt: 'Sample Photo 2',
+        width: 2400,
+        height: 1600
+      }
+    ]
   }
 ]
 
-export default function Home() {
+export default async function Home() {
+  let photoShoots: PhotoShoot[] = []
+  
+  try {
+    photoShoots = await getPhotoShoots()
+    
+    // If no photo shoots found, use fallback
+    if (photoShoots.length === 0) {
+      photoShoots = fallbackPhotoShoots
+    }
+  } catch (error) {
+    console.error('Error loading photo shoots:', error)
+    photoShoots = fallbackPhotoShoots
+  }
+
   return (
     <div className="min-h-screen relative">
-      <PhotoGallery photos={mockPhotos} />
+      <PhotoGallery photoShoots={photoShoots} />
     </div>
   )
 }

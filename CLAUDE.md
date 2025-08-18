@@ -5,10 +5,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 
 Taylor Diamond's photography portfolio website built with Next.js 15, TypeScript, and modern web technologies. Features include:
-- Interactive 3D homepage with React Three Fiber
-- Cloudinary-powered photo gallery
-- Markdown-based blog system
-- Creative navigation and animations
+- Cloudinary-powered photo gallery with priority folder system
+- Vertical scrolling sections with horizontal photo rows
+- Real-time Cloudinary API integration
+- Dynamic photo shoot organization
 - Fully responsive design with Tailwind CSS
 
 ## Development Commands
@@ -31,6 +31,9 @@ npm run lint
 
 # Type checking
 npm run type-check
+
+# Fetch Cloudinary data
+npm run fetch-cloudinary
 ```
 
 ## Architecture
@@ -39,33 +42,31 @@ npm run type-check
 ```
 src/
 ├── app/                    # Next.js App Router pages
-│   ├── about/             # About page
-│   ├── blog/              # Blog listing and individual posts
-│   ├── photos/            # Photo gallery
+│   ├── dates/             # Dates page
 │   ├── globals.css        # Global styles
 │   ├── layout.tsx         # Root layout
-│   └── page.tsx           # Homepage
+│   └── page.tsx           # Homepage with photo gallery
 ├── components/            # Reusable components
 │   ├── Navigation.tsx     # Main navigation component
-│   ├── Scene3D.tsx        # 3D scene for homepage
-│   ├── PhotoGallery.tsx   # Photo gallery with lightbox
-│   └── BlogCard.tsx       # Blog post preview card
+│   ├── PhotoGallery.tsx   # Photo gallery with vertical/horizontal scrolling
+│   ├── ImageMindscape.tsx # Image component
+│   └── SocialDock.tsx     # Social media links
 ├── lib/                   # Utility functions
-│   ├── cloudinary.ts      # Cloudinary integration
-│   └── blog.ts            # Blog post management
+│   └── cloudinary.ts      # Cloudinary integration with priority folders
+├── data/                  # Generated data files
+│   └── cloudinary-data.json # Cached Cloudinary photo data
 └── types/                 # TypeScript type definitions
 
-content/
-└── blog/                  # Markdown blog posts
+scripts/
+└── fetch-cloudinary-data.js # Script to fetch and cache Cloudinary data
 ```
 
 ### Key Technologies
 - **Next.js 15** with App Router and TypeScript
-- **React Three Fiber** + **Three.js** for 3D graphics
-- **Framer Motion** for animations
+- **Cloudinary** for image management and API
 - **Tailwind CSS** for styling
-- **Cloudinary** for image management
-- **Gray Matter** + **Remark** for markdown processing
+- **Framer Motion** for animations
+- **Lucide React** for icons
 
 ### Cloudinary Integration
 - Configure environment variables in `.env.local`:
@@ -73,14 +74,17 @@ content/
   - `CLOUDINARY_API_KEY`
   - `CLOUDINARY_API_SECRET`
 - Image transformations are handled via `src/lib/cloudinary.ts`
-- Photos page uses mock data but is ready for Cloudinary integration
+- Dynamic photo loading from Cloudinary folders
+- Priority folder system (folders starting with `*` appear first)
+- Cached data generation via `npm run fetch-cloudinary`
 
-### Blog System
-- Markdown files in `content/blog/` directory
-- Frontmatter for metadata (title, date, tags, etc.)
-- Automatic slug generation from filename
-- Static generation for all blog posts
-- Easy content management - just add `.md` files
+### Photo Gallery System
+- **Vertical scrolling**: Each photo shoot gets its own full-screen section
+- **Horizontal scrolling**: Photos within each section scroll horizontally
+- **Priority folders**: Cloudinary folders starting with `*` appear at the top
+- **Real-time integration**: Can load data directly from Cloudinary API
+- **Cached mode**: Pre-generated JSON data for faster loading
+- **Responsive design**: Works on all screen sizes
 
 ### Styling Conventions
 - Dark theme with glass morphism effects
@@ -91,32 +95,25 @@ content/
 
 ## Adding Content
 
-### Blog Posts
-Create new markdown files in `content/blog/` with this frontmatter:
-```yaml
----
-title: "Post Title"
-excerpt: "Brief description"
-date: "YYYY-MM-DD"
-author: "Taylor Diamond"
-tags: ["tag1", "tag2"]
-coverImage: "https://image-url.jpg"
-readTime: "5 min read"
----
-```
-
 ### Photos
-- Upload to Cloudinary and organize in folders
-- Update photo gallery to fetch from Cloudinary API
-- Categories can be managed via Cloudinary tags or folders
+1. **Upload to Cloudinary**: Organize photos in the "PORTRAIT PHOTOGRAPHY" folder
+2. **Create subfolders**: Each subfolder becomes a section in the portfolio
+3. **Priority folders**: Prefix folder names with `*` to make them appear first
+4. **Update data**: Run `npm run fetch-cloudinary` to update the portfolio
+5. **Automatic deployment**: The app fetches fresh data on each build
+
+### Priority Folder Examples
+- `*2025 FEATURED WORK` → Appears first, displays as "2025 Featured Work"
+- `*BEST OF 2024` → Appears second, displays as "Best Of 2024"  
+- `2023 ZEMETA RUNWAY SHOW` → Appears after priority folders, sorted alphabetically
 
 ## Development Notes
 
 - Uses `--legacy-peer-deps` for React 19 compatibility
-- 3D scenes may impact performance on lower-end devices
-- Images are optimized via Next.js Image component
-- Navigation includes scroll-based transparency effects
-- All animations use Framer Motion for consistency
+- Images are optimized via Next.js Image component and Cloudinary transformations
+- Full-screen sections with smooth scrolling behavior
+- Hidden scrollbars for clean aesthetic
+- Real-time Cloudinary API integration with fallback to cached data
 
 ## Deployment
 

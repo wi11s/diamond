@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import Image from 'next/image'
-import { ArrowLeft, ArrowRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface Photo {
   id: string
@@ -12,51 +12,94 @@ interface Photo {
   height: number
 }
 
-interface PhotoGalleryProps {
+interface PhotoShoot {
+  name: string
   photos: Photo[]
 }
 
-export default function PhotoGallery({ photos }: PhotoGalleryProps) {
-  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0)
+interface PhotoGalleryProps {
+  photoShoots: PhotoShoot[]
+}
 
-  const nextPhoto = () => {
-    setCurrentPhotoIndex((prev) => (prev + 1) % photos.length)
+export default function PhotoGallery({ photoShoots }: PhotoGalleryProps) {
+  const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null)
+
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  const scrollLeft = (containerId: string) => {
+    const container = document.getElementById(containerId)
+    if (container) {
+      container.scrollBy({ left: -400, behavior: 'smooth' })
+    }
   }
 
-  const prevPhoto = () => {
-    setCurrentPhotoIndex((prev) => (prev - 1 + photos.length) % photos.length)
+  const scrollRight = (containerId: string) => {
+    const container = document.getElementById(containerId)
+    if (container) {
+      container.scrollBy({ left: 400, behavior: 'smooth' })
+    }
   }
-
-  const currentPhoto = photos[currentPhotoIndex]
-
-  if (!currentPhoto) return null
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <div className="relative h-screen">
-        <Image
-          src={currentPhoto.src}
-          alt={currentPhoto.alt}
-          fill
-          className="object-cover"
-          sizes="100vw"
-          priority
-        />
-        
-        <button
-          onClick={prevPhoto}
-          className="absolute left-4 top-1/2 -translate-y-1/2 p-2 text-white hover:text-gray-300"
+      {photoShoots.map((shoot, shootIndex) => (
+        <section 
+          key={shoot.name} 
+          className="h-screen relative"
+        >          
+          <div className="relative h-screen">
+            <div
+              id={`scroll-container-${shootIndex}`}
+              className="flex overflow-x-auto scrollbar-hide scroll-smooth h-screen"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              {shoot.photos.map((photo) => (
+                <div
+                  key={photo.id}
+                  className="flex-shrink-0 cursor-pointer group/photo h-screen"
+                  onClick={() => setSelectedPhoto(photo)}
+                >
+                  <div className="relative w-auto h-screen overflow-hidden">
+                    <Image
+                      src={photo.src}
+                      alt={photo.alt}
+                      width={photo.width}
+                      height={photo.height}
+                      className="h-screen w-auto object-cover transition-transform duration-300 group-hover/photo:scale-105"
+                      sizes="100vh"
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover/photo:bg-black/20 transition-all duration-300" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      ))}
+
+      {selectedPhoto && (
+        <div 
+          className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4"
+          onClick={() => setSelectedPhoto(null)}
         >
-          <ArrowLeft size={24} />
-        </button>
-        
-        <button
-          onClick={nextPhoto}
-          className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-white hover:text-gray-300"
-        >
-          <ArrowRight size={24} />
-        </button>
-      </div>
+          <div className="relative max-w-7xl max-h-full">
+            <Image
+              src={selectedPhoto.src}
+              alt={selectedPhoto.alt}
+              width={selectedPhoto.width}
+              height={selectedPhoto.height}
+              className="object-contain max-w-full max-h-full"
+              sizes="100vw"
+            />
+            <button
+              onClick={() => setSelectedPhoto(null)}
+              className="absolute top-4 right-4 text-white hover:text-gray-300 text-2xl"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
