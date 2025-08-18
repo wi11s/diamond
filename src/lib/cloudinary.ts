@@ -114,13 +114,13 @@ export async function getPhotoShoots() {
           }
 
           photos = photosResult.resources
-            .filter(resource => {
+            .filter((resource: any) => {
               // Only include images that are actually in this subfolder
               const expectedFolderPath = `PORTRAIT PHOTOGRAPHY/${subfolder.name}`
               const actualFolderPath = resource.asset_folder || resource.folder
               return actualFolderPath === expectedFolderPath
             })
-            .map(resource => {
+            .map((resource: any) => {
               // Generate URL without forced dimensions for smaller images
               const useOriginalSize = resource.width < 1200 || resource.height < 800
               
