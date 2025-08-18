@@ -124,3 +124,5 @@ readTime: "5 min read"
 - Static files served from `public/` 
 - Environment variables required for Cloudinary
 - Recommended platforms: Vercel, Netlify, or any Node.js host
+
+

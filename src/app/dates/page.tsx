@@ -1,7 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
-import { Calendar, MapPin, Clock, Music, Volume2, Users } from 'lucide-react'
+import { Calendar, MapPin, Clock, Music, Users } from 'lucide-react'
 
 // Upcoming DJ sets and events
 const upcomingEvents = [
@@ -102,159 +101,89 @@ const getStatusInfo = (status: string) => {
 
 export default function Dates() {
   return (
-    <div className="min-h-screen bg-black text-white overflow-auto relative">
-      {/* DIAMONDCUTZ Background */}
-      <div className="fixed inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 0.05, scale: 1 }}
-          transition={{ duration: 2 }}
-          className="text-[20vw] font-black leading-none select-none"
-          style={{
-            fontFamily: 'Arial Black, sans-serif',
-            letterSpacing: '-0.1em',
-            transform: 'rotate(-15deg)'
-          }}
-        >
-          DIAMONDCUTZ
-        </motion.div>
-      </div>
+    <div className="min-h-screen bg-black text-white p-6 pt-24">
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-4xl font-bold mb-12 text-center">Upcoming Events</h1>
 
-      <div className="relative z-10 max-w-5xl mx-auto px-6 py-24">
-        
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="text-center mb-20"
-        >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1, delay: 0.3 }}
-            className="mb-8"
-          >
-            <h1 className="chunky-font text-6xl md:text-8xl font-black mb-4 bg-gradient-to-r from-white via-gray-300 to-white bg-clip-text text-transparent">
-              DIAMONDCUTZ
-            </h1>
-            <div className="flex items-center justify-center gap-4 text-white/60">
-              <Volume2 size={20} />
-              <span className="font-mono uppercase tracking-[0.3em] text-sm">
-                Upcoming Sets & Events
-              </span>
-              <Volume2 size={20} />
-            </div>
-          </motion.div>
-        </motion.div>
-
-        {/* Events Grid */}
-        <div className="space-y-8">
-          {upcomingEvents.map((event, index) => {
+        <div className="space-y-6">
+          {upcomingEvents.map((event) => {
             const statusInfo = getStatusInfo(event.status)
             
             return (
-              <motion.div
+              <div
                 key={event.id}
-                initial={{ opacity: 0, x: -40 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8, delay: index * 0.15 }}
-                className="bg-black/60 backdrop-blur-sm border border-white/10 hover:border-white/30 
-                         transition-all duration-500 overflow-hidden group"
+                className="border border-white/20 p-6"
               >
-                <div className="p-8">
-                  <div className="flex items-start justify-between mb-6">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-4 mb-4">
-                        <Music className={getEventColor(event.type)} size={24} />
-                        <h3 className="text-2xl md:text-3xl font-light">
-                          {event.title}
-                        </h3>
-                        <span className={`px-3 py-1 text-xs font-mono uppercase tracking-wider ${statusInfo.color}`}>
-                          {statusInfo.text}
-                        </span>
+                <div className="flex items-center gap-4 mb-4">
+                  <Music size={20} />
+                  <h3 className="text-xl font-medium">{event.title}</h3>
+                  <span className={`px-2 py-1 text-xs ${statusInfo.color}`}>
+                    {statusInfo.text}
+                  </span>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm text-white/80">
+                  <div className="flex items-center gap-2">
+                    <Calendar size={16} />
+                    <div>
+                      <div className="text-xs text-white/60">DATE</div>
+                      <div>
+                        {new Date(event.date).toLocaleDateString('en-US', { 
+                          weekday: 'short', 
+                          month: 'short', 
+                          day: 'numeric' 
+                        })}
                       </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-white/70">
-                        <div className="flex items-center gap-3">
-                          <Calendar size={18} />
-                          <div>
-                            <div className="text-sm font-mono opacity-60">DATE</div>
-                            <div className="font-medium">
-                              {new Date(event.date).toLocaleDateString('en-US', { 
-                                weekday: 'short', 
-                                month: 'short', 
-                                day: 'numeric' 
-                              })}
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center gap-3">
-                          <Clock size={18} />
-                          <div>
-                            <div className="text-sm font-mono opacity-60">TIME</div>
-                            <div className="font-medium">{event.time}</div>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center gap-3">
-                          <MapPin size={18} />
-                          <div>
-                            <div className="text-sm font-mono opacity-60">VENUE</div>
-                            <div className="font-medium">{event.venue}</div>
-                            <div className="text-sm opacity-60">{event.location}</div>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center gap-3">
-                          <Users size={18} />
-                          <div>
-                            <div className="text-sm font-mono opacity-60">CAPACITY</div>
-                            <div className="font-medium">{event.capacity}</div>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="mt-4 pt-4 border-t border-white/10">
-                        <div className="text-sm font-mono opacity-60 mb-1">SOUND</div>
-                        <div className="text-lg font-medium text-white/90">{event.genre}</div>
-                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <Clock size={16} />
+                    <div>
+                      <div className="text-xs text-white/60">TIME</div>
+                      <div>{event.time}</div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <MapPin size={16} />
+                    <div>
+                      <div className="text-xs text-white/60">VENUE</div>
+                      <div>{event.venue}</div>
+                      <div className="text-xs text-white/60">{event.location}</div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <Users size={16} />
+                    <div>
+                      <div className="text-xs text-white/60">CAPACITY</div>
+                      <div>{event.capacity}</div>
                     </div>
                   </div>
                 </div>
                 
-                {/* Animated bottom bar */}
-                <div className="h-1 bg-gradient-to-r from-transparent via-white/20 to-transparent 
-                               transform scale-x-0 group-hover:scale-x-100 transition-transform duration-700" />
-              </motion.div>
+                <div className="mt-4 pt-4 border-t border-white/10">
+                  <div className="text-xs text-white/60 mb-1">GENRE</div>
+                  <div className="text-white">{event.genre}</div>
+                </div>
+              </div>
             )
           })}
         </div>
 
-        {/* Booking Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 60 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 1.2 }}
-          className="text-center mt-24 pt-16 border-t border-white/10"
-        >
-          <h2 className="text-3xl font-light mb-6">
-            Book DIAMONDCUTZ
-          </h2>
-          <p className="text-white/60 mb-10 text-lg">
+        <div className="text-center mt-16 pt-12 border-t border-white/20">
+          <h2 className="text-2xl font-semibold mb-4">Book Events</h2>
+          <p className="text-white/80 mb-8">
             Available for private events, clubs, festivals, and collaborations.
           </p>
-          <motion.a
+          <a
             href="mailto:bookings@diamondcutz.com"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="inline-block px-12 py-4 border-2 border-white text-white hover:bg-white 
-                     hover:text-black transition-all duration-400 font-mono uppercase tracking-[0.2em] text-sm"
+            className="inline-block px-8 py-3 border border-white text-white hover:bg-white hover:text-black transition-colors"
           >
             Get in Touch
-          </motion.a>
-        </motion.div>
+          </a>
+        </div>
       </div>
     </div>
   )
