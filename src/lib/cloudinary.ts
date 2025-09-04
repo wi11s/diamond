@@ -53,10 +53,15 @@ export async function getImagesByTag(tag: string): Promise<CloudinaryImage[]> {
 
 export async function getFolders(): Promise<any[]> {
   try {
+    // Short-circuit if env not configured
+    if (!process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+      return []
+    }
     const results = await cloudinary.api.sub_folders('')
     return results.folders
   } catch (error) {
-    console.error('Error fetching folders from Cloudinary:', error)
+    // Downgrade to warn to avoid noisy server errors in dev; fallback logic will handle it
+    console.warn('Cloudinary folders unavailable; using fallback.')
     return []
   }
 }
@@ -209,7 +214,7 @@ export async function getPhotoShoots() {
 
     return photoShoots
   } catch (error) {
-    console.error('Error fetching photo shoots from Cloudinary:', error)
+    console.warn('Falling back to local Cloudinary data for photo shoots.')
     try {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const localData = require('@/data/cloudinary-data.json')
@@ -355,7 +360,7 @@ export async function getLandscapePhotos() {
       return []
     }
   } catch (error) {
-    console.error('Error fetching landscape photos:', error)
+    console.warn('Falling back to local Cloudinary data for landscape photos.')
     return []
   }
 }

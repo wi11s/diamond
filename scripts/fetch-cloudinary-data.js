@@ -153,13 +153,100 @@ async function fetchCloudinaryData() {
       }
     }
 
-    // Add placeholder for landscape/travel section
-    const landscapeFolder = folders.find(f => f.name === 'LANDSCAPE AND TRAVEL PHOTOGRAPHY');
+    // Fetch landscape/travel section (flattened)
+    const LAND_ROOT = 'LANDSCAPE AND TRAVEL PHOTOGRAPHY';
+    const landscapeFolder = folders.find(f => f.name === LAND_ROOT);
     if (landscapeFolder) {
-      console.log('Adding placeholder for LANDSCAPE AND TRAVEL PHOTOGRAPHY...');
+      console.log('Fetching LANDSCAPE AND TRAVEL PHOTOGRAPHY...');
+
+      const buildPhoto = (resource, altFallback) => ({
+        id: resource.public_id,
+        src: cloudinary.url(resource.public_id, {
+          quality: 'auto',
+          fetch_format: 'auto',
+          width: 2400,
+          crop: 'fit',
+          dpr: 'auto'
+        }),
+        alt: resource.display_name || altFallback,
+        width: resource.width || 2400,
+        height: resource.height || 1600,
+        public_id: resource.public_id
+      });
+
+      const collected = [];
+
+      try {
+        // Direct root and recursive searches
+        const rootSearch = await cloudinary.search
+          .expression(`folder:"${LAND_ROOT}"`)
+          .sort_by('created_at', 'desc')
+          .max_results(100)
+          .execute();
+
+        const recursiveSearch = await cloudinary.search
+          .expression(`folder:${LAND_ROOT}/*`)
+          .sort_by('created_at', 'desc')
+          .max_results(200)
+          .execute();
+
+        const all = [ ...(rootSearch?.resources || []), ...(recursiveSearch?.resources || []) ];
+        if (all.length) {
+          const photos = all
+            .filter(r => {
+              const folder = r.asset_folder || r.folder || '';
+              return folder === LAND_ROOT || folder.startsWith(`${LAND_ROOT}/`);
+            })
+            .map(r => buildPhoto(r, LAND_ROOT));
+          collected.push(...photos);
+        }
+      } catch (e) {
+        console.warn('Landscape root/recursive search failed, trying subfolders...');
+      }
+
+      if (!collected.length) {
+        try {
+          const landSub = await cloudinary.api.sub_folders(landscapeFolder.path);
+          const subfolders = landSub.folders;
+          for (const subfolder of subfolders) {
+            try {
+              let searchPath = subfolder.path.replace(/"/g, '\\"');
+              if (searchPath.includes('*')) {
+                searchPath = searchPath.replace(/\*/g, '\\*');
+              }
+              let photosResult = await cloudinary.search
+                .expression(`folder:\"${searchPath}\"`)
+                .sort_by('created_at', 'desc')
+                .max_results(100)
+                .execute();
+              if (photosResult.resources.length === 0) {
+                photosResult = await cloudinary.search
+                  .expression(`folder:${subfolder.path}`)
+                  .sort_by('created_at', 'desc')
+                  .max_results(100)
+                  .execute();
+              }
+
+              const photos = photosResult.resources
+                .filter(resource => {
+                  const expected = `${LAND_ROOT}/${subfolder.name}`;
+                  const actual = resource.asset_folder || resource.folder;
+                  return actual === expected;
+                })
+                .map(resource => buildPhoto(resource, subfolder.name));
+              collected.push(...photos);
+            } catch (err) {
+              console.warn(`Landscape subfolder failed: ${subfolder.name}`);
+            }
+          }
+        } catch (e) {
+          console.warn('Landscape subfolder listing failed.');
+        }
+      }
+
       photoShoots.push({
         name: 'Landscape & Travel',
-        photos: [], // Placeholder - will be implemented later
+        photos: collected,
         priority: false
       });
     }
@@ -199,7 +286,19 @@ async function fetchCloudinaryData() {
 
   } catch (error) {
     console.error('Error fetching Cloudinary data:', error);
-    process.exit(1);
+    // Graceful fallback on rate limits or any failure: keep existing JSON if present
+    try {
+      const outputPath = path.join(__dirname, '..', 'src', 'data', 'cloudinary-data.json');
+      if (fs.existsSync(outputPath)) {
+        console.warn('Using existing local cloudinary-data.json due to fetch error.');
+        process.exit(0);
+      } else {
+        console.error('No existing local data found; cannot proceed.');
+        process.exit(1);
+      }
+    } catch (_) {
+      process.exit(1);
+    }
   }
 }
 
