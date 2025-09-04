@@ -41,20 +41,33 @@ export default async function Home() {
   let photoShoots: PhotoShoot[] = []
   
   try {
-    photoShoots = await getPhotoShoots()
-    
-    // If no photo shoots found, use fallback
-    if (photoShoots.length === 0) {
+    // Check if environment variables are set
+    if (!process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+      console.error('Missing Cloudinary environment variables')
+      console.error('NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME:', !!process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME)
+      console.error('CLOUDINARY_API_KEY:', !!process.env.CLOUDINARY_API_KEY)
+      console.error('CLOUDINARY_API_SECRET:', !!process.env.CLOUDINARY_API_SECRET)
       photoShoots = fallbackPhotoShoots
+    } else {
+      photoShoots = await getPhotoShoots()
+      
+      // If no photo shoots found, use fallback
+      if (photoShoots.length === 0) {
+        console.error('No photo shoots returned from Cloudinary')
+        photoShoots = fallbackPhotoShoots
+      }
     }
   } catch (error) {
     console.error('Error loading photo shoots:', error)
     photoShoots = fallbackPhotoShoots
   }
 
+  // Exclude Landscape & Travel from the horizontal gallery; rendered on /landscape instead
+  const portraitShoots = photoShoots.filter((shoot) => shoot.name !== 'Landscape & Travel')
+
   return (
     <div className="min-h-screen relative">
-      <PhotoGallery photoShoots={photoShoots} />
+      <PhotoGallery photoShoots={portraitShoots} />
     </div>
   )
 }

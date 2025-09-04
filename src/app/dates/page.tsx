@@ -1,7 +1,5 @@
 'use client'
 
-import { Calendar, MapPin, Clock, Music, Users } from 'lucide-react'
-
 // Upcoming DJ sets and events
 const upcomingEvents = [
   {
@@ -101,88 +99,22 @@ const getStatusInfo = (status: string) => {
 
 export default function Dates() {
   return (
-    <div className="min-h-screen bg-black text-white p-6 pt-24">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold mb-12 text-center">Upcoming Events</h1>
-
-        <div className="space-y-6">
-          {upcomingEvents.map((event) => {
-            const statusInfo = getStatusInfo(event.status)
-            
-            return (
-              <div
-                key={event.id}
-                className="border border-white/20 p-6"
-              >
-                <div className="flex items-center gap-4 mb-4">
-                  <Music size={20} />
-                  <h3 className="text-xl font-medium">{event.title}</h3>
-                  <span className={`px-2 py-1 text-xs ${statusInfo.color}`}>
-                    {statusInfo.text}
-                  </span>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm text-white/80">
-                  <div className="flex items-center gap-2">
-                    <Calendar size={16} />
-                    <div>
-                      <div className="text-xs text-white/60">DATE</div>
-                      <div>
-                        {new Date(event.date).toLocaleDateString('en-US', { 
-                          weekday: 'short', 
-                          month: 'short', 
-                          day: 'numeric' 
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <Clock size={16} />
-                    <div>
-                      <div className="text-xs text-white/60">TIME</div>
-                      <div>{event.time}</div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <MapPin size={16} />
-                    <div>
-                      <div className="text-xs text-white/60">VENUE</div>
-                      <div>{event.venue}</div>
-                      <div className="text-xs text-white/60">{event.location}</div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <Users size={16} />
-                    <div>
-                      <div className="text-xs text-white/60">CAPACITY</div>
-                      <div>{event.capacity}</div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="mt-4 pt-4 border-t border-white/10">
-                  <div className="text-xs text-white/60 mb-1">GENRE</div>
-                  <div className="text-white">{event.genre}</div>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-
-        <div className="text-center mt-16 pt-12 border-t border-white/20">
-          <h2 className="text-2xl font-semibold mb-4">Book Events</h2>
-          <p className="text-white/80 mb-8">
-            Available for private events, clubs, festivals, and collaborations.
-          </p>
-          <a
-            href="mailto:bookings@diamondcutz.com"
-            className="inline-block px-8 py-3 border border-white text-white hover:bg-white hover:text-black transition-colors"
-          >
-            Get in Touch
-          </a>
+    <div className="min-h-screen bg-white text-black px-6 pt-24">
+      <div className="max-w-2xl mx-auto">
+        <h1 className="text-2xl font-semibold mb-8">Dates</h1>
+        <ul className="space-y-3">
+          {upcomingEvents.map((event) => (
+            <li key={event.id} className="text-sm leading-6">
+              {new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+              {' — '}
+              {event.title}
+              {' — '}
+              {event.venue}, {event.location}
+            </li>
+          ))}
+        </ul>
+        <div className="mt-12">
+          <a href="mailto:bookings@diamondcutz.com" className="underline">Bookings</a>
         </div>
       </div>
     </div>
