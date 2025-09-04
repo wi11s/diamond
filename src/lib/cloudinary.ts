@@ -247,67 +247,113 @@ export const imageTransforms = {
 // Fetch all landscape photos (flattened) from the LANDSCAPE AND TRAVEL PHOTOGRAPHY folder
 export async function getLandscapePhotos() {
   try {
-    const folders = await getFolders()
-    const landscapeFolder = folders.find(f => f.name === 'LANDSCAPE AND TRAVEL PHOTOGRAPHY')
-    if (!landscapeFolder) return []
+    const ROOT = 'LANDSCAPE AND TRAVEL PHOTOGRAPHY'
 
-    const landscapeSubfoldersResult = await cloudinary.api.sub_folders(landscapeFolder.path)
-    const subfolders = landscapeSubfoldersResult.folders
+    const buildPhoto = (resource: any, altFallback: string) => ({
+      id: resource.public_id,
+      src: cloudinary.url(resource.public_id, {
+        quality: 'auto',
+        fetch_format: 'auto',
+        width: 2400,
+        crop: 'fit',
+        dpr: 'auto'
+      }),
+      alt: resource.display_name || altFallback,
+      width: resource.width || 2400,
+      height: resource.height || 1600,
+      public_id: resource.public_id
+    })
 
-    const allPhotos: any[] = []
+    const collected: any[] = []
 
-    for (const subfolder of subfolders) {
+    // Attempt direct search without listing folders
+    try {
+      const rootSearch = await cloudinary.search
+        .expression(`folder:"${ROOT}"`)
+        .sort_by('created_at', 'desc')
+        .max_results(100)
+        .execute()
+
+      const recursiveSearch = await cloudinary.search
+        .expression(`folder:${ROOT}/*`)
+        .sort_by('created_at', 'desc')
+        .max_results(200)
+        .execute()
+
+      const all = [...(rootSearch?.resources || []), ...(recursiveSearch?.resources || [])]
+      if (all.length > 0) {
+        const photos = all
+          .filter((r: any) => {
+            const folder = r.asset_folder || r.folder || ''
+            return folder === ROOT || folder.startsWith(`${ROOT}/`)
+          })
+          .map((r: any) => buildPhoto(r, ROOT))
+        collected.push(...photos)
+      }
+    } catch (e) {
+      // ignore and fall back
+    }
+
+    // If still empty, try subfolders API
+    if (collected.length === 0) {
       try {
-        let searchPath = subfolder.path.replace(/"/g, '\\"')
-        if (searchPath.includes('*')) {
-          searchPath = searchPath.replace(/\*/g, '\\*')
-        }
+        const landscapeSubfoldersResult = await cloudinary.api.sub_folders(ROOT)
+        const subfolders = landscapeSubfoldersResult.folders
 
-        let photosResult = await cloudinary.search
-          .expression(`folder:"${searchPath}"`)
-          .sort_by('created_at', 'desc')
-          .max_results(100)
-          .execute()
-
-        if (photosResult.resources.length === 0) {
-          photosResult = await cloudinary.search
-            .expression(`folder:${subfolder.path}`)
-            .sort_by('created_at', 'desc')
-            .max_results(100)
-            .execute()
-        }
-
-        const photos = photosResult.resources
-          .filter((resource: any) => {
-            const expectedFolderPath = `LANDSCAPE AND TRAVEL PHOTOGRAPHY/${subfolder.name}`
-            const actualFolderPath = resource.asset_folder || resource.folder
-            return actualFolderPath === expectedFolderPath
-          })
-          .map((resource: any) => {
-            const imageUrl = cloudinary.url(resource.public_id, {
-              quality: 'auto',
-              fetch_format: 'auto',
-              width: 2400,
-              crop: 'fit',
-              dpr: 'auto'
-            })
-            return {
-              id: resource.public_id,
-              src: imageUrl,
-              alt: resource.display_name || subfolder.name,
-              width: resource.width || 2400,
-              height: resource.height || 1600,
-              public_id: resource.public_id
+        for (const subfolder of subfolders) {
+          try {
+            let searchPath = subfolder.path.replace(/"/g, '\\"')
+            if (searchPath.includes('*')) {
+              searchPath = searchPath.replace(/\*/g, '\\*')
             }
-          })
 
-        allPhotos.push(...photos)
-      } catch (error) {
-        console.error(`Error fetching landscape photos for ${subfolder.name}:`, error)
+            let photosResult = await cloudinary.search
+              .expression(`folder:"${searchPath}"`)
+              .sort_by('created_at', 'desc')
+              .max_results(100)
+              .execute()
+
+            if (photosResult.resources.length === 0) {
+              photosResult = await cloudinary.search
+                .expression(`folder:${subfolder.path}`)
+                .sort_by('created_at', 'desc')
+                .max_results(100)
+                .execute()
+            }
+
+            const photos = photosResult.resources
+              .filter((resource: any) => {
+                const expectedFolderPath = `${ROOT}/${subfolder.name}`
+                const actualFolderPath = resource.asset_folder || resource.folder
+                return actualFolderPath === expectedFolderPath
+              })
+              .map((resource: any) => buildPhoto(resource, subfolder.name))
+
+            collected.push(...photos)
+          } catch (error) {
+            console.error(`Error fetching landscape photos for ${subfolder.name}:`, error)
+          }
+        }
+      } catch (e) {
+        // ignore
       }
     }
 
-    return allPhotos
+    if (collected.length > 0) return collected
+
+    // Final fallback: local JSON
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const localData = require('@/data/cloudinary-data.json')
+      const landscape = (localData || []).find((s: any) => s.name === 'Landscape & Travel')
+      const photos = (landscape?.photos || []).map((p: any) => ({
+        ...p,
+        src: buildImageUrl(p.public_id || p.id, 'w_2400,c_fit,q_auto,f_auto,dpr_auto')
+      }))
+      return photos
+    } catch (e) {
+      return []
+    }
   } catch (error) {
     console.error('Error fetching landscape photos:', error)
     return []
