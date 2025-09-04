@@ -16,11 +16,11 @@ interface LandscapeGalleryProps {
 
 export default function LandscapeGallery({ photos }: LandscapeGalleryProps) {
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-white text-black">
       <section className="min-h-screen relative">
-        <div className="w-full py-12">
+        <div className="w-full">
           {photos.map((photo, idx) => (
-            <div key={photo.id} className={`w-full relative border-t border-white ${idx === 0 ? 'first:border-t-0' : ''}`}>
+            <div key={photo.id} className={`w-full relative border-t border-black ${idx === 0 ? 'first:border-t-0' : ''}`}>
               <Image
                 src={photo.src}
                 alt={photo.alt}

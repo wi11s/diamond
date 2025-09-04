@@ -23,6 +23,7 @@ interface PhotoGalleryProps {
 
 export default function PhotoGallery({ photoShoots }: PhotoGalleryProps) {
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null)
+  const [loadedIds, setLoadedIds] = useState<Set<string>>(new Set())
   const [fadedTitles, setFadedTitles] = useState<Set<number>>(new Set())
 
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -82,7 +83,7 @@ export default function PhotoGallery({ photoShoots }: PhotoGalleryProps) {
   console.log(photoShoots)
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-white text-black">
       {photoShoots.map((shoot, shootIndex) => (
         <section 
           key={shoot.name} 
@@ -118,8 +119,12 @@ export default function PhotoGallery({ photoShoots }: PhotoGalleryProps) {
                       width={photo.width}
                       height={photo.height}
                       className="h-screen w-auto object-contain transition-transform duration-300"
+                      onLoadingComplete={() => setLoadedIds((prev) => { const next = new Set(prev); next.add(photo.id); return next })}
                       sizes="100vh"
                     />
+                    {/* Loading skeleton overlay */}
+                    <div className={`${loadedIds.has(photo.id) ? 'opacity-0' : 'opacity-100'} absolute inset-0 bg-gradient-to-b from-black/10 to-transparent animate-pulse transition-opacity duration-500`} />
+                    {/* Dark-to-light hover overlay */}
                     <div className="absolute inset-0 bg-black/40 group-hover/photo:bg-black/0 transition-all duration-300" />
                   </div>
                 </div>
