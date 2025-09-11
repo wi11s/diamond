@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import Navigation from '@/components/Navigation'
 import SocialDock from '@/components/SocialDock'
+import UsageNotice from '@/components/UsageNotice'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -33,6 +34,7 @@ export default function RootLayout({
         <main className="min-h-screen">
           {children}
         </main>
+        <UsageNotice />
         <SocialDock />
       </body>
     </html>

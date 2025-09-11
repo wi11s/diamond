@@ -7,12 +7,12 @@
 }
 
 html {
-  background: #000;
+  background: #fff;
 }
 
 body {
-  background: #000;
-  color: white;
+  background: #fff;
+  color: black;
   font-family: system-ui, -apple-system, sans-serif;
 }
 

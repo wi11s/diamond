@@ -14,6 +14,7 @@ const navItems = [
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false)
   const pathname = usePathname()
+  const isLightNav = pathname === '/dates'
 
   return (
     <>
@@ -29,8 +30,8 @@ export default function Navigation() {
                 prefetch
                 className={`text-sm font-medium transition-colors ${
                   pathname === item.href
-                    ? 'text-white'
-                    : 'text-white/70 hover:text-white'
+                    ? (isLightNav ? 'text-black' : 'text-white')
+                    : (isLightNav ? 'text-black/70 hover:text-black' : 'text-white/70 hover:text-white')
                 }`}
               >
                 {item.label}
@@ -41,7 +42,7 @@ export default function Navigation() {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="md:hidden p-2 text-white"
+            className={`md:hidden p-2 ${isLightNav ? 'text-black' : 'text-white'}`}
           >
             {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>

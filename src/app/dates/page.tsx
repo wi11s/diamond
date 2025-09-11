@@ -1,79 +1,14 @@
 'use client'
 
-// Upcoming DJ sets and events
+// Events
 const upcomingEvents = [
   {
     id: '1',
-    title: 'Midnight Warehouse Session',
-    date: '2024-02-16',
-    time: '23:00',
-    venue: 'Underground NYC',
-    location: 'Brooklyn, NY',
-    type: 'warehouse',
-    genre: 'Techno • Dark House',
-    capacity: '500',
-    status: 'confirmed'
+    title: 'Press Pause Film Festival Screening',
+    date: '2025-09-12',
+    venue: 'Museum of the Moving Image',
+    location: 'Astoria, Queens',
   },
-  {
-    id: '2',
-    title: 'Rooftop Sunset Vibes',
-    date: '2024-02-23',
-    time: '18:00',
-    venue: 'Sky Lounge',
-    location: 'Manhattan, NY',
-    type: 'rooftop',
-    genre: 'Deep House • Progressive',
-    capacity: '200',
-    status: 'confirmed'
-  },
-  {
-    id: '3',
-    title: 'Underground Friday',
-    date: '2024-03-01',
-    time: '22:00',
-    venue: 'The Basement',
-    location: 'Queens, NY',
-    type: 'club',
-    genre: 'Tech House • Minimal',
-    capacity: '300',
-    status: 'sold_out'
-  },
-  {
-    id: '4',
-    title: 'Festival Main Stage',
-    date: '2024-03-08',
-    time: '20:00',
-    venue: 'Electric Dreams Festival',
-    location: 'Central Park, NY',
-    type: 'festival',
-    genre: 'Progressive House • Trance',
-    capacity: '5000',
-    status: 'confirmed'
-  },
-  {
-    id: '5',
-    title: 'Late Night Sessions',
-    date: '2024-03-15',
-    time: '01:00',
-    venue: 'After Hours',
-    location: 'Brooklyn, NY',
-    type: 'afterparty',
-    genre: 'Melodic Techno • Deep',
-    capacity: '150',
-    status: 'private'
-  },
-  {
-    id: '6',
-    title: 'Summer Kickoff Party',
-    date: '2024-03-22',
-    time: '19:00',
-    venue: 'Harbor Club',
-    location: 'Jersey City, NJ',
-    type: 'outdoor',
-    genre: 'House • Disco • Funk',
-    capacity: '800',
-    status: 'confirmed'
-  }
 ]
 
 const getEventColor = (type: string) => {
@@ -105,7 +40,7 @@ export default function Dates() {
         <ul className="space-y-3">
           {upcomingEvents.map((event) => (
             <li key={event.id} className="text-sm leading-6">
-              {new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+              {new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
               {' — '}
               {event.title}
               {' — '}
@@ -114,7 +49,7 @@ export default function Dates() {
           ))}
         </ul>
         <div className="mt-12">
-          <a href="mailto:bookings@diamondcutz.com" className="underline">Bookings</a>
+          <a href="mailto:taylor.diamond10@gmail.com" className="underline">Bookings</a>
         </div>
       </div>
     </div>
