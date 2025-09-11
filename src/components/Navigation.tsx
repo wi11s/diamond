@@ -18,7 +18,7 @@ export default function Navigation() {
   return (
     <>
       {/* Desktop Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 p-6">
+      <nav className="fixed top-0 left-0 right-0 z-40 p-6">
         <div className="max-w-7xl mx-auto flex justify-end items-center">
           {/* Desktop Menu */}
           <div className="hidden md:flex gap-8">
@@ -26,6 +26,7 @@ export default function Navigation() {
               <Link
                 key={item.href}
                 href={item.href}
+                prefetch
                 className={`text-sm font-medium transition-colors ${
                   pathname === item.href
                     ? 'text-white'
@@ -57,6 +58,7 @@ export default function Navigation() {
                 key={item.href}
                 href={item.href}
                 onClick={() => setIsOpen(false)}
+                prefetch
                 className={`text-xl font-medium transition-colors ${
                   pathname === item.href
                     ? 'text-white'

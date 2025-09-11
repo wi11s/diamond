@@ -29,6 +29,7 @@ export default function PhotoGallery({ photoShoots }: PhotoGalleryProps) {
   const [isExpandedLoaded, setIsExpandedLoaded] = useState(false)
   const firstImageRefs = useRef<Record<number, HTMLDivElement | null>>({})
   const [titleMaxWidths, setTitleMaxWidths] = useState<Record<number, number>>({})
+  const [canScroll, setCanScroll] = useState<Record<number, boolean>>({})
 
   const measureFirstImage = (index: number) => {
     const el = firstImageRefs.current[index]
@@ -80,6 +81,11 @@ export default function PhotoGallery({ photoShoots }: PhotoGalleryProps) {
       const container = document.getElementById(`scroll-container-${index}`)
       if (container) {
         container.addEventListener('scroll', handleScroll)
+        // Determine if this container is horizontally scrollable
+        setCanScroll(prev => ({
+          ...prev,
+          [index]: container.scrollWidth > container.clientWidth + 1,
+        }))
       }
     })
 
@@ -98,6 +104,16 @@ export default function PhotoGallery({ photoShoots }: PhotoGalleryProps) {
   useEffect(() => {
     const onResize = () => {
       photoShoots.forEach((_, idx) => measureFirstImage(idx))
+      // Re-check scrollability on resize
+      photoShoots.forEach((_, idx) => {
+        const container = document.getElementById(`scroll-container-${idx}`)
+        if (container) {
+          setCanScroll(prev => ({
+            ...prev,
+            [idx]: container.scrollWidth > container.clientWidth + 1,
+          }))
+        }
+      })
     }
     window.addEventListener('resize', onResize)
     onResize()
@@ -175,6 +191,18 @@ export default function PhotoGallery({ photoShoots }: PhotoGalleryProps) {
                 </div>
               ))}
             </div>
+            {/* Subtle scroll hint: right-edge gradient + chevron, hidden after scroll */}
+            <div
+              className={`pointer-events-none absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-black/20 to-transparent transition-opacity duration-300 ${
+                canScroll[shootIndex] && !fadedTitles.has(shootIndex) ? 'opacity-100' : 'opacity-0'
+              }`}
+            />
+            <ChevronRight
+              className={`pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-white/70 transition-opacity duration-300 ${
+                canScroll[shootIndex] && !fadedTitles.has(shootIndex) ? 'opacity-100' : 'opacity-0'
+              } animate-pulse`}
+              size={20}
+            />
           </div>
         </section>
       ))}
@@ -211,7 +239,7 @@ export default function PhotoGallery({ photoShoots }: PhotoGalleryProps) {
             </div>
             <button
               onClick={() => setSelectedPhoto(null)}
-              className="absolute top-4 right-4 text-black hover:text-gray-600 text-2xl"
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl"
               aria-label="Close"
             >
               ×

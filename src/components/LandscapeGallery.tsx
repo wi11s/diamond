@@ -79,7 +79,7 @@ export default function LandscapeGallery({ photos }: LandscapeGalleryProps) {
             </div>
             <button
               onClick={() => setSelectedPhoto(null)}
-              className="absolute top-4 right-4 text-black hover:text-gray-600 text-2xl"
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl"
               aria-label="Close"
             >
               ×
