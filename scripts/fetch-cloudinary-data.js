@@ -272,8 +272,8 @@ async function fetchCloudinaryData() {
       const aNum = typeof a.orderIndex === 'number' ? a.orderIndex : null;
       const bNum = typeof b.orderIndex === 'number' ? b.orderIndex : null;
 
-      // If both have numeric prefixes, sort by descending number (10, 9, 8, ...)
-      if (aNum !== null && bNum !== null) return bNum - aNum;
+      // If both have numeric prefixes, sort by ascending number (1, 2, 3, ...)
+      if (aNum !== null && bNum !== null) return aNum - bNum;
       // If only one has numeric prefix, it comes first
       if (aNum !== null && bNum === null) return -1;
       if (aNum === null && bNum !== null) return 1;
