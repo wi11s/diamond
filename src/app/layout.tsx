@@ -4,6 +4,7 @@ import './globals.css'
 import Navigation from '@/components/Navigation'
 import SocialDock from '@/components/SocialDock'
 import UsageNotice from '@/components/UsageNotice'
+import InactivityHide from '@/components/InactivityHide'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -30,6 +31,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
+        <InactivityHide />
         <Navigation />
         <main className="min-h-screen">
           {children}

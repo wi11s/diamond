@@ -16,6 +16,15 @@ body {
   font-family: system-ui, -apple-system, sans-serif;
 }
 
+/* Auto-hide UI chrome on inactivity (toggled by .ui-idle on <html>) */
+.auto-hide {
+  transition: opacity 300ms ease;
+}
+.ui-idle .auto-hide {
+  opacity: 0;
+  pointer-events: none;
+}
+
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;

@@ -19,7 +19,7 @@ export default function Navigation() {
   return (
     <>
       {/* Desktop Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-40 p-6">
+      <nav className="auto-hide fixed top-0 left-0 right-0 z-40 p-6">
         <div className="max-w-7xl mx-auto flex justify-end items-center">
           {/* Desktop Menu */}
           <div className="hidden md:flex gap-8">
