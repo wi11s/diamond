@@ -31,7 +31,7 @@ export default function LandscapeGallery({ photos }: LandscapeGalleryProps) {
           {photos.map((photo, idx) => (
             <div
               key={photo.id}
-              className={`w-full relative border-t border-black ${idx === 0 ? 'first:border-t-0' : ''} cursor-pointer`}
+              className={`w-full relative border-t border-white ${idx === 0 ? 'first:border-t-0' : ''} cursor-pointer`}
               onClick={() => setSelectedPhoto(photo)}
             >
               <Image
