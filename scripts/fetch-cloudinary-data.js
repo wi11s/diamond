@@ -129,23 +129,35 @@ async function fetchCloudinaryData() {
 
         // Only add shoots that have photos
         if (photos.length > 0) {
-          // Process the original name to handle priority marker first
+          // Process the original name to handle priority marker and numeric prefix
           let processedName = subfolder.name;
           let isPriority = false;
-          
+          let numericOrder = null;
+
           // Check if this is a priority folder (starts with *)
           if (processedName.startsWith('*')) {
             isPriority = true;
             processedName = processedName.substring(1).trim(); // Remove the * and any following whitespace
           }
-          
+
+          // Extract numeric prefix like "10.", "9.", etc., and strip it from name
+          const numberMatch = processedName.match(/^\s*(\d+)\.\s*(.*)$/);
+          if (numberMatch) {
+            numericOrder = parseInt(numberMatch[1], 10);
+            processedName = numberMatch[2];
+          }
+
           // Then clean up escaped quotes
-          const cleanName = processedName.replace(/\\"/g, '"');
-          
+          const cleanName = processedName.replace(/\\\"/g, '"');
+
+          // Final display name (remove any leftover leading/trailing whitespace and capitalize first letter)
+          const displayName = (cleanName || '').trim();
+
           photoShoots.push({
-            name: cleanName.charAt(0).toUpperCase() + cleanName.slice(1),
+            name: displayName.charAt(0).toUpperCase() + displayName.slice(1),
             photos: photos,
-            priority: isPriority
+            priority: isPriority,
+            orderIndex: typeof numericOrder === 'number' ? numericOrder : undefined,
           });
         }
 
@@ -251,13 +263,22 @@ async function fetchCloudinaryData() {
       });
     }
 
-    // Sort photo shoots: priority folders first, then alphabetically
+    // Sort photo shoots: priority first, then numeric prefix (desc), then alphabetically
     photoShoots.sort((a, b) => {
       // Priority folders come first
       if (a.priority && !b.priority) return -1;
       if (!a.priority && b.priority) return 1;
-      
-      // Within same priority level, sort alphabetically
+
+      const aNum = typeof a.orderIndex === 'number' ? a.orderIndex : null;
+      const bNum = typeof b.orderIndex === 'number' ? b.orderIndex : null;
+
+      // If both have numeric prefixes, sort by descending number (10, 9, 8, ...)
+      if (aNum !== null && bNum !== null) return bNum - aNum;
+      // If only one has numeric prefix, it comes first
+      if (aNum !== null && bNum === null) return -1;
+      if (aNum === null && bNum !== null) return 1;
+
+      // Fallback: alphabetical by name
       return a.name.localeCompare(b.name);
     });
 

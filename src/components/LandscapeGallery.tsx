@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import { useEffect, useState } from 'react'
 
 interface Photo {
   id: string
@@ -8,6 +9,7 @@ interface Photo {
   alt: string
   width: number
   height: number
+  public_id?: string
 }
 
 interface LandscapeGalleryProps {
@@ -15,12 +17,23 @@ interface LandscapeGalleryProps {
 }
 
 export default function LandscapeGallery({ photos }: LandscapeGalleryProps) {
+  const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null)
+  const [isExpandedLoaded, setIsExpandedLoaded] = useState(false)
+
+  useEffect(() => {
+    setIsExpandedLoaded(false)
+  }, [selectedPhoto?.id])
+
   return (
     <div className="min-h-screen bg-white text-black">
       <section className="min-h-screen relative">
         <div className="w-full">
           {photos.map((photo, idx) => (
-            <div key={photo.id} className={`w-full relative border-t border-black ${idx === 0 ? 'first:border-t-0' : ''}`}>
+            <div
+              key={photo.id}
+              className={`w-full relative border-t border-black ${idx === 0 ? 'first:border-t-0' : ''} cursor-pointer`}
+              onClick={() => setSelectedPhoto(photo)}
+            >
               <Image
                 src={photo.src}
                 alt={photo.alt}
@@ -33,8 +46,47 @@ export default function LandscapeGallery({ photos }: LandscapeGalleryProps) {
           ))}
         </div>
       </section>
+
+      {selectedPhoto && (
+        <div
+          className="fixed inset-0 bg-white z-50 flex items-center justify-center p-6"
+          onClick={() => setSelectedPhoto(null)}
+        >
+          <div
+            className="relative w-full h-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="relative w-full h-full">
+              <Image
+                src={selectedPhoto.public_id && process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
+                  ? `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/${selectedPhoto.public_id}`
+                  : selectedPhoto.src}
+                alt={selectedPhoto.alt}
+                fill
+                className="object-contain"
+                sizes="100vw"
+                unoptimized
+                onLoadingComplete={() => setIsExpandedLoaded(true)}
+              />
+              {/* Loading overlay: match page spinner */}
+              <div
+                className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 ${
+                  isExpandedLoaded ? 'opacity-0' : 'opacity-100'
+                }`}
+              >
+                <div className="w-6 h-6 border-[3px] border-transparent border-t-gray-300 rounded-full animate-spin" />
+              </div>
+            </div>
+            <button
+              onClick={() => setSelectedPhoto(null)}
+              className="absolute top-4 right-4 text-black hover:text-gray-600 text-2xl"
+              aria-label="Close"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
-
-
