@@ -147,34 +147,10 @@ export async function getPhotoShoots() {
 
           // Only add shoots that have photos
           if (photos.length > 0) {
-            // Process the original name to handle priority marker and numeric prefix
-            let processedName = subfolder.name
-            let isPriority = false
-            let numericOrder: number | null = null
-
-            // Check if this is a priority folder (starts with *)
-            if (processedName.startsWith('*')) {
-              isPriority = true
-              processedName = processedName.substring(1).trim() // Remove the * and any following whitespace
-            }
-
-            // Extract numeric prefix like "10.", "9.", etc., and strip it from name
-            const numberMatch = processedName.match(/^\s*(\d+)\.\s*(.*)$/)
-            if (numberMatch) {
-              numericOrder = parseInt(numberMatch[1], 10)
-              processedName = numberMatch[2]
-            }
-
-            // Then clean up escaped quotes
-            const cleanName = processedName.replace(/\\"/g, '"')
-
-            const displayName = (cleanName || '').trim()
-
+            // Keep original folder name; no renaming/sorting here
             photoShoots.push({
-              name: displayName.charAt(0).toUpperCase() + displayName.slice(1),
+              name: subfolder.name,
               photos: photos,
-              priority: isPriority,
-              orderIndex: typeof numericOrder === 'number' ? numericOrder : undefined,
             })
           }
         } catch (error) {
@@ -190,28 +166,10 @@ export async function getPhotoShoots() {
       photoShoots.push({
         name: 'Landscape & Travel',
         photos: [], // Placeholder - will be implemented later
-        priority: false
       })
     }
 
-    // Sort photo shoots: priority first, then numeric prefix (desc), then alphabetically
-    photoShoots.sort((a: any, b: any) => {
-      // Priority folders come first
-      if (a.priority && !b.priority) return -1
-      if (!a.priority && b.priority) return 1
-
-      const aNum = typeof a.orderIndex === 'number' ? a.orderIndex : null
-      const bNum = typeof b.orderIndex === 'number' ? b.orderIndex : null
-
-      // If both have numeric prefixes, sort by descending number (10, 9, 8, ...)
-      if (aNum !== null && bNum !== null) return bNum - aNum
-      // If only one has numeric prefix, it comes first
-      if (aNum !== null && bNum === null) return -1
-      if (aNum === null && bNum !== null) return 1
-
-      // Fallback: alphabetical by name
-      return a.name.localeCompare(b.name)
-    })
+    // No sorting here; frontend will sort by numeric prefixes as needed
 
     // If we couldn't fetch folders or found nothing, fall back to local data
     if (!folders || folders.length === 0 || photoShoots.length === 0) {

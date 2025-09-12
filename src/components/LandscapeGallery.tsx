@@ -28,9 +28,9 @@ export default function LandscapeGallery({ photos }: LandscapeGalleryProps) {
     <div className="min-h-screen bg-white text-black">
       <section className="min-h-screen relative">
         <div className="w-full">
-          {photos.map((photo, idx) => (
+          {Array.from(new Map(photos.map((p) => [p.id, p])).values()).map((photo, idx) => (
             <div
-              key={photo.id}
+              key={`${photo.id}-${idx}`}
               className={`w-full relative border-t border-white ${idx === 0 ? 'first:border-t-0' : ''} cursor-pointer`}
               onClick={() => setSelectedPhoto(photo)}
             >

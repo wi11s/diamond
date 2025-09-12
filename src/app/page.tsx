@@ -63,7 +63,22 @@ export default async function Home() {
   }
 
   // Exclude Landscape & Travel from the horizontal gallery; rendered on /landscape instead
-  const portraitShoots = photoShoots.filter((shoot) => shoot.name !== 'Landscape & Travel')
+  const portraitShootsRaw = photoShoots.filter((shoot) => shoot.name !== 'Landscape & Travel')
+  const portraitShoots = portraitShootsRaw
+    .map((s: any) => {
+      const match = (s.name || '').match(/^\s*(\d+)[\.|\-|\)]\s*(.*)$/)
+      const order = match ? parseInt(match[1], 10) : null
+      const cleanName = match ? match[2].trim() : (s.name || '').trim()
+      return { ...s, name: cleanName, _order: order }
+    })
+    .sort((a: any, b: any) => {
+      const an = a._order, bn = b._order
+      if (an != null && bn != null) return an - bn
+      if (an != null && bn == null) return -1
+      if (an == null && bn != null) return 1
+      return a.name.localeCompare(b.name)
+    })
+    .map(({ _order, ...rest }: any) => rest)
 
   return (
     <div className="min-h-screen relative">
