@@ -1,6 +1,8 @@
-'use client'
+import { getDjFliers } from '@/lib/cloudinary'
+import FliersBackground from '@/components/FliersBackground'
+import Link from 'next/link'
 
-// Events
+// Events (placeholder — extend as needed)
 const upcomingEvents = [
   {
     id: '1',
@@ -11,45 +13,53 @@ const upcomingEvents = [
   },
 ]
 
-const getEventColor = (type: string) => {
-  switch (type) {
-    case 'warehouse': return 'text-red-400'
-    case 'rooftop': return 'text-orange-400'
-    case 'club': return 'text-purple-400'
-    case 'festival': return 'text-green-400'
-    case 'afterparty': return 'text-pink-400'
-    case 'outdoor': return 'text-blue-400'
-    default: return 'text-white'
-  }
-}
+export default async function Dates() {
+  const fliers = await getDjFliers(36)
 
-const getStatusInfo = (status: string) => {
-  switch (status) {
-    case 'confirmed': return { text: 'Confirmed', color: 'bg-green-500/20 text-green-400' }
-    case 'sold_out': return { text: 'Sold Out', color: 'bg-red-500/20 text-red-400' }
-    case 'private': return { text: 'Private', color: 'bg-yellow-500/20 text-yellow-400' }
-    default: return { text: 'TBA', color: 'bg-gray-500/20 text-gray-400' }
-  }
-}
-
-export default function Dates() {
   return (
-    <div className="min-h-screen bg-white text-black px-6 pt-24">
-      <div className="max-w-2xl mx-auto">
-        <h1 className="text-2xl font-semibold mb-8">Dates</h1>
-        <ul className="space-y-3">
-          {upcomingEvents.map((event) => (
-            <li key={event.id} className="text-sm leading-6">
-              {new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-              {' — '}
-              {event.title}
-              {' — '}
-              {event.venue}, {event.location}
-            </li>
-          ))}
-        </ul>
-        <div className="mt-12">
-          <a href="mailto:taylor.diamond10@gmail.com" className="underline">Bookings</a>
+    <div className="relative min-h-screen text-black">
+      {/* Fliers masonry at the very top */}
+      <section className="px-0 pt-0">
+        {fliers && fliers.length > 0 && <FliersBackground photos={fliers} absolute={false} />}
+      </section>
+
+      {/* Local nav below the fliers */}
+      <div className="px-6 mt-6 max-w-6xl mx-auto">
+        <div className="flex justify-end gap-4">
+          <Link href="/portraits" className="text-sm text-black/70 hover:text-black hover:underline underline-offset-4">Portraits</Link>
+          <Link href="/landscape" className="text-sm text-black/70 hover:text-black hover:underline underline-offset-4">Landscape</Link>
+          <Link href="/bio" className="text-sm text-black/70 hover:text-black hover:underline underline-offset-4">Bio</Link>
+          <Link href="/dates" className="text-sm text-black font-medium">Dates</Link>
+        </div>
+      </div>
+
+      {/* Dates content centered below nav */}
+      <div className="px-6 pt-10 pb-20 max-w-6xl mx-auto flex justify-center">
+        <div className="max-w-2xl w-full">
+          <div className="mb-6 text-center">
+            <h1 className="text-2xl font-semibold">Dates</h1>
+            <p className="text-sm text-black/60 mt-1">DJ sets and screenings</p>
+          </div>
+
+        {/* The fliers collage now lives as the page background */}
+
+        {/* Dates list */}
+        <section>
+          <ul className="space-y-3 text-center">
+            {upcomingEvents.map((event) => (
+              <li key={event.id} className="text-sm leading-6">
+                {new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                {' — '}
+                {event.title}
+                {' — '}
+                {event.venue}, {event.location}
+              </li>
+            ))}
+          </ul>
+          <div className="mt-10 text-center">
+            <a href="mailto:taylor.diamond10@gmail.com" className="underline">Bookings</a>
+          </div>
+        </section>
         </div>
       </div>
     </div>

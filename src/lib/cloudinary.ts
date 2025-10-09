@@ -227,6 +227,119 @@ export const imageTransforms = {
   hero: 'w_1920,h_1080,c_fill,q_auto,f_auto',
 }
 
+// Fetch featured DJ photos (exclude fliers)
+export async function getDjPhotos(limit = 3) {
+  try {
+    const ROOT = 'DJ'
+
+    const buildPhoto = (resource: any, altFallback: string) => ({
+      id: resource.public_id,
+      src: cloudinary.url(resource.public_id, {
+        quality: 'auto',
+        fetch_format: 'auto',
+        width: 2400,
+        crop: 'fit',
+        dpr: 'auto'
+      }),
+      alt: resource.display_name || altFallback,
+      width: resource.width || 2400,
+      height: resource.height || 1600,
+      public_id: resource.public_id
+    })
+
+    const collected: any[] = []
+
+    // Pull from ROOT and subfolders; filter out obvious fliers by id
+    try {
+      const rootSearch = await cloudinary.search
+        .expression(`folder:\"${ROOT}\"`)
+        .sort_by('created_at', 'desc')
+        .max_results(100)
+        .execute()
+
+      const recursiveSearch = await cloudinary.search
+        .expression(`folder:${ROOT}/*`)
+        .sort_by('created_at', 'desc')
+        .max_results(200)
+        .execute()
+
+      const all = [...(rootSearch?.resources || []), ...(recursiveSearch?.resources || [])]
+      const seen = new Set<string>()
+      const photos = all
+        .filter((r: any) => {
+          const id = (r.public_id || '').toLowerCase()
+          // Try to exclude fliers by id substring as folder metadata may be missing in results
+          if (id.includes('/fliers/') || id.includes('/flyers/') || id.includes('flier') || id.includes('flyer')) return false
+          if (seen.has(r.public_id)) return false
+          seen.add(r.public_id)
+          return true
+        })
+        .map((r: any) => buildPhoto(r, ROOT))
+
+      collected.push(...photos)
+    } catch (e) {
+      // ignore, fall through
+    }
+
+    // Return top N
+    if (collected.length > 0) return collected.slice(0, limit)
+    return []
+  } catch (error) {
+    console.warn('DJ photos unavailable; returning empty list.')
+    return []
+  }
+}
+
+// Fetch DJ fliers/flyers for collage
+export async function getDjFliers(limit = 24) {
+  try {
+    const ROOT = 'DJ'
+    const SUBS = ['FLIERS', 'FLYERS']
+
+    const buildPhoto = (resource: any, altFallback: string) => ({
+      id: resource.public_id,
+      src: cloudinary.url(resource.public_id, {
+        quality: 'auto',
+        fetch_format: 'auto',
+        width: 1000,
+        crop: 'fit',
+        dpr: 'auto'
+      }),
+      alt: resource.display_name || altFallback,
+      width: resource.width || 1000,
+      height: resource.height || 1000,
+      public_id: resource.public_id
+    })
+
+    const collected: any[] = []
+
+    for (const sub of SUBS) {
+      try {
+        const path = `${ROOT}/${sub}`
+        const escaped = path.replace(/"/g, '\\\"').replace(/\*/g, '\\\\*')
+        const search = await cloudinary.search
+          .expression(`folder:\"${escaped}\"`)
+          .sort_by('created_at', 'desc')
+          .max_results(limit)
+          .execute()
+
+        const items = (search?.resources || [])
+          // Some accounts omit folder metadata on search response; trust the folder expression and avoid over-filtering
+          .map((r: any) => buildPhoto(r, sub))
+
+        collected.push(...items)
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    return collected.slice(0, limit)
+  } catch (error) {
+    console.warn('DJ fliers unavailable; returning empty list.')
+    return []
+  }
+}
+
 // Fetch all landscape photos (flattened) from the LANDSCAPE AND TRAVEL PHOTOGRAPHY folder
 export async function getLandscapePhotos() {
   try {

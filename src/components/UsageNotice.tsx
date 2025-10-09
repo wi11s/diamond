@@ -7,7 +7,12 @@ export default function UsageNotice() {
   const pathname = usePathname()
 
   // Only show on portrait and landscape pages
-  const allowed = pathname?.startsWith('/portraits') || pathname?.startsWith('/landscape')
+  // Include home page since it displays portraits
+  const allowed = (
+    pathname === '/' ||
+    pathname?.startsWith('/portraits') ||
+    pathname?.startsWith('/landscape')
+  )
 
   if (!allowed) return null
 
