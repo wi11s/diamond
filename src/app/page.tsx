@@ -79,6 +79,14 @@ export default async function Home() {
       return a.name.localeCompare(b.name)
     })
     .map(({ _order, ...rest }: any) => rest)
+    .map((shoot: any) => ({
+      ...shoot,
+      photos: [...(shoot.photos || [])].sort((a: any, b: any) => {
+        const an = (a.alt || a.display_name || a.id || '').toString().toLowerCase()
+        const bn = (b.alt || b.display_name || b.id || '').toString().toLowerCase()
+        return an.localeCompare(bn, undefined, { sensitivity: 'base' })
+      })
+    }))
 
   return (
     <div className="min-h-screen relative">

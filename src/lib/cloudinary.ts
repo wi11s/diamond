@@ -118,32 +118,53 @@ export async function getPhotoShoots() {
             console.log(`Direct search found ${photosResult.resources.length} resources`)
           }
 
-          photos = photosResult.resources
-            .filter((resource: any) => {
-              // Only include images that are actually in this subfolder
-              const expectedFolderPath = `PORTRAIT PHOTOGRAPHY/${subfolder.name}`
-              const actualFolderPath = resource.asset_folder || resource.folder
-              return actualFolderPath === expectedFolderPath
-            })
-            .map((resource: any) => {
-              // Preserve original aspect ratio; deliver reasonably large width
-              const imageUrl = cloudinary.url(resource.public_id, {
-                quality: 'auto',
-                fetch_format: 'auto',
-                width: 2400,
-                crop: 'fit',
-                dpr: 'auto'
-              })
+          const filtered = photosResult.resources.filter((resource: any) => {
+            // Only include images that are actually in this subfolder
+            const expectedFolderPath = `PORTRAIT PHOTOGRAPHY/${subfolder.name}`
+            const actualFolderPath = resource.asset_folder || resource.folder
+            return actualFolderPath === expectedFolderPath
+          })
 
-              return {
-                id: resource.public_id,
-                src: imageUrl,
-                alt: resource.display_name || subfolder.name,
-                width: resource.width || 2400,
-                height: resource.height || 1600,
-                public_id: resource.public_id
-              }
+          // Sort photos by display_name A–Z (case-insensitive). Fallback to filename if missing.
+          const sorted = filtered
+            .map((resource: any, index: number) => ({
+              resource,
+              index,
+              name: (
+                resource.display_name ||
+                (resource.public_id || '').split('/').pop() ||
+                ''
+              ).toString()
+            }))
+            .sort((a: any, b: any) => {
+              const an = a.name.toLowerCase()
+              const bn = b.name.toLowerCase()
+              const cmp = an.localeCompare(bn, undefined, { sensitivity: 'base' })
+              if (cmp !== 0) return cmp
+              // Stable by original index
+              return a.index - b.index
             })
+            .map(({ resource }: any) => resource)
+
+          photos = sorted.map((resource: any) => {
+            // Preserve original aspect ratio; deliver reasonably large width
+            const imageUrl = cloudinary.url(resource.public_id, {
+              quality: 'auto',
+              fetch_format: 'auto',
+              width: 2400,
+              crop: 'fit',
+              dpr: 'auto'
+            })
+
+            return {
+              id: resource.public_id,
+              src: imageUrl,
+              alt: resource.display_name || subfolder.name,
+              width: resource.width || 2400,
+              height: resource.height || 1600,
+              public_id: resource.public_id
+            }
+          })
 
           // Only add shoots that have photos
           if (photos.length > 0) {
@@ -179,10 +200,16 @@ export async function getPhotoShoots() {
         // Rebuild src URLs to ensure non-cropped fit
         return localData.map((shoot: any) => ({
           ...shoot,
-          photos: (shoot.photos || []).map((p: any) => ({
-            ...p,
-            src: buildImageUrl(p.public_id || p.id, 'w_2400,c_fit,q_auto,f_auto,dpr_auto')
-          }))
+          photos: (shoot.photos || [])
+            .map((p: any) => ({
+              ...p,
+              src: buildImageUrl(p.public_id || p.id, 'w_2400,c_fit,q_auto,f_auto,dpr_auto')
+            }))
+            .sort((a: any, b: any) => {
+              const an = (a.display_name || a.alt || a.id || '').toString().toLowerCase()
+              const bn = (b.display_name || b.alt || b.id || '').toString().toLowerCase()
+              return an.localeCompare(bn, undefined, { sensitivity: 'base' })
+            })
         }))
       } catch (e) {
         console.error('Failed to load local Cloudinary data:', e)
@@ -198,10 +225,16 @@ export async function getPhotoShoots() {
       const localData = require('@/data/cloudinary-data.json')
       return localData.map((shoot: any) => ({
         ...shoot,
-        photos: (shoot.photos || []).map((p: any) => ({
-          ...p,
-          src: buildImageUrl(p.public_id || p.id, 'w_2400,c_fit,q_auto,f_auto,dpr_auto')
-        }))
+        photos: (shoot.photos || [])
+          .map((p: any) => ({
+            ...p,
+            src: buildImageUrl(p.public_id || p.id, 'w_2400,c_fit,q_auto,f_auto,dpr_auto')
+          }))
+          .sort((a: any, b: any) => {
+            const an = (a.display_name || a.alt || a.id || '').toString().toLowerCase()
+            const bn = (b.display_name || b.alt || b.id || '').toString().toLowerCase()
+            return an.localeCompare(bn, undefined, { sensitivity: 'base' })
+          })
       }))
     } catch (e) {
       return []
