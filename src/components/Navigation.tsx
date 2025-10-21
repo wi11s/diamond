@@ -9,13 +9,14 @@ const navItems = [
   { href: '/portraits', label: 'Portraits' },
   { href: '/landscape', label: 'Landscape' },
   { href: '/dates', label: 'Dates' },
+  { href: '/links', label: 'Links' },
   { href: '/bio', label: 'Bio' },
 ]
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false)
   const pathname = usePathname()
-  const isLightNav = pathname === '/dates' || pathname === '/bio'
+  const isLightNav = pathname === '/dates' || pathname === '/bio' || pathname === '/links'
 
   // On Dates page, nav links are rendered below the fliers section locally
   if (pathname === '/dates') {

@@ -2,14 +2,21 @@ import { getDjFliers } from '@/lib/cloudinary'
 import FliersBackground from '@/components/FliersBackground'
 import Link from 'next/link'
 
-// Events (placeholder — extend as needed)
+// Events
 const upcomingEvents = [
   {
     id: '1',
-    title: 'Press Pause Film Festival Screening',
-    date: '2025-09-12',
-    venue: 'Museum of the Moving Image',
-    location: 'Astoria, Queens',
+    title: 'Halloween Costume Party (DJ Set)',
+    date: '2025-10-31',
+    venue: 'Private Brooklyn Location',
+    location: '',
+  },
+  {
+    id: '2',
+    title: 'DJ Set with imaginary friends',
+    date: '2025-11-06',
+    venue: 'Jade Bar',
+    location: 'Brooklyn',
   },
 ]
 
@@ -31,6 +38,7 @@ export default async function Dates() {
             <Link href="/portraits" className="text-sm text-black/70 hover:text-black hover:underline underline-offset-4">Portraits</Link>
             <Link href="/landscape" className="text-sm text-black/70 hover:text-black hover:underline underline-offset-4">Landscape</Link>
             <Link href="/dates" className="text-sm text-black font-medium">Dates</Link>
+            <Link href="/links" className="text-sm text-black/70 hover:text-black hover:underline underline-offset-4">Links</Link>
             <Link href="/bio" className="text-sm text-black/70 hover:text-black hover:underline underline-offset-4">Bio</Link>
           </div>
 
@@ -48,7 +56,8 @@ export default async function Dates() {
                     {' — '}
                     {event.title}
                     {' — '}
-                    {event.venue}, {event.location}
+                    {event.venue}
+                    {event.location ? `, ${event.location}` : ''}
                   </li>
                 ))}
               </ul>
