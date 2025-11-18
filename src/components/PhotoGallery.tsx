@@ -2,8 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
-import Link from 'next/link'
-import { ChevronLeft, ChevronRight, List, X } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
 
 interface Photo {
   id: string
@@ -32,7 +31,6 @@ export default function PhotoGallery({ photoShoots }: PhotoGalleryProps) {
   const [titleMaxWidths, setTitleMaxWidths] = useState<Record<number, number>>({})
   const [canScroll, setCanScroll] = useState<Record<number, boolean>>({})
   const holdScroll = useRef<Record<number, { raf: number | null; dir: -1 | 1; last: number }>>({})
-  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
 
   const measureFirstImage = (index: number) => {
     const el = firstImageRefs.current[index]
@@ -274,49 +272,7 @@ export default function PhotoGallery({ photoShoots }: PhotoGalleryProps) {
         </section>
       ))}
 
-      {/* Mobile page navigation button (top-right) */}
-      <button
-        aria-label="Open navigation menu"
-        className="md:hidden fixed top-5 right-5 z-[90] pointer-events-auto rounded-full bg-white text-black border border-black/10 shadow-md p-3 active:scale-95"
-        onClick={() => setIsMobileNavOpen(true)}
-      >
-        <List size={20} />
-      </button>
-
-      {/* Mobile page navigation modal */}
-      {isMobileNavOpen && (
-        <div className="fixed inset-0 z-[100] md:hidden" role="dialog" aria-modal="true">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setIsMobileNavOpen(false)} />
-          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-2xl">
-            <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-black/10">
-              <div className="h-1.5 w-10 bg-black/10 rounded-full mx-auto absolute left-1/2 -translate-x-1/2 top-2" />
-              <h3 className="text-base font-semibold">Menu</h3>
-              <button aria-label="Close" className="p-2 -mr-2" onClick={() => setIsMobileNavOpen(false)}>
-                <X size={20} />
-              </button>
-            </div>
-            <nav className="max-h-[60vh] overflow-y-auto px-2 py-2">
-              {[
-                { href: '/portraits', label: 'Portraits' },
-                { href: '/landscape', label: 'Landscape' },
-                { href: '/dates', label: 'Dates' },
-                { href: '/links', label: 'Links' },
-                { href: '/bio', label: 'Bio' },
-              ].map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setIsMobileNavOpen(false)}
-                  className="block w-full px-3 py-3 text-sm border-b border-black/5 active:bg-black/5"
-                >
-                  {item.label}
-                </Link>
-              ))}
-              <div className="pb-[max(env(safe-area-inset-bottom),1rem)]" />
-            </nav>
-          </div>
-        </div>
-      )}
+      {/* Mobile page navigation uses the global Navigation component's button; no duplicate here. */}
 
       {selectedPhoto && (
         <div
