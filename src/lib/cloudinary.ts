@@ -260,6 +260,53 @@ export const imageTransforms = {
   hero: 'w_1920,h_1080,c_fill,q_auto,f_auto',
 }
 
+// Fetch a single DJ headshot image by name pattern
+export async function getDjHeadshot() {
+  try {
+    const QUERY = 'DJHEADSHOT'
+    const ROOT = 'DJ'
+
+    const make = (r: any) => ({
+      id: r.public_id,
+      src: cloudinary.url(r.public_id, {
+        quality: 'auto',
+        fetch_format: 'auto',
+        width: 1600,
+        crop: 'fit',
+        dpr: 'auto'
+      }),
+      alt: r.display_name || 'DJ Headshot',
+      width: r.width || 1600,
+      height: r.height || 1200,
+      public_id: r.public_id,
+    })
+
+    // Try precise search inside DJ and subfolders
+    const expr = `resource_type:image AND (folder:${ROOT} OR folder:${ROOT}/*) AND (public_id:${QUERY}* OR filename:${QUERY}* OR display_name:${QUERY}*)`
+    const res = await cloudinary.search
+      .expression(expr)
+      .sort_by('created_at', 'desc')
+      .max_results(5)
+      .execute()
+
+    const first = (res?.resources || [])[0]
+    if (first) return make(first)
+
+    // Fallback: direct public id
+    const fallbackId = `${ROOT}/${QUERY}`
+    return {
+      id: fallbackId,
+      src: buildImageUrl(fallbackId, 'w_1600,c_fit,q_auto,f_auto,dpr_auto'),
+      alt: 'DJ Headshot',
+      width: 1600,
+      height: 1200,
+      public_id: fallbackId,
+    }
+  } catch (_) {
+    return null
+  }
+}
+
 // Fetch featured DJ photos (exclude fliers)
 export async function getDjPhotos(limit = 3) {
   try {

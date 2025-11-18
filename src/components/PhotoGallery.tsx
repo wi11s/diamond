@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
 
 interface Photo {
   id: string
@@ -181,6 +181,7 @@ export default function PhotoGallery({ photoShoots }: PhotoGalleryProps) {
 
   return (
     <div className="min-h-screen bg-white text-black">
+      {/* Unified layout (mobile + desktop): horizontal scroll by shoots */}
       {photoShoots.map((shoot, shootIndex) => (
         <section 
           key={shoot.name} 
@@ -262,7 +263,7 @@ export default function PhotoGallery({ photoShoots }: PhotoGalleryProps) {
               }`}
             />
             <ChevronRight
-              className={`pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-white/70 transition-opacity duration-300 ${
+              className={`hidden md:block pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-white/70 transition-opacity duration-300 ${
                 canScroll[shootIndex] && !fadedTitles.has(shootIndex) ? 'opacity-100' : 'opacity-0'
               } animate-pulse`}
               size={20}
@@ -270,6 +271,8 @@ export default function PhotoGallery({ photoShoots }: PhotoGalleryProps) {
           </div>
         </section>
       ))}
+
+      {/* Mobile page navigation uses the global Navigation component's button; no duplicate here. */}
 
       {selectedPhoto && (
         <div

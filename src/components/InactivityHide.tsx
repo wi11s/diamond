@@ -8,6 +8,19 @@ export default function InactivityHide() {
   useEffect(() => {
     const root = document.documentElement
 
+    // On mobile/touch devices, keep UI always visible
+    const isMobile =
+      (typeof window !== 'undefined' && (
+        window.matchMedia('(max-width: 767px)').matches ||
+        window.matchMedia('(pointer: coarse)').matches ||
+        'ontouchstart' in window
+      )) || false
+
+    if (isMobile) {
+      root.classList.remove('ui-idle')
+      return
+    }
+
     const setIdle = () => {
       root.classList.add('ui-idle')
     }
@@ -21,10 +34,10 @@ export default function InactivityHide() {
       timerRef.current = setTimeout(setIdle, 2000)
     }
 
-    // Initialize
+    // Initialize (desktop only)
     resetTimer()
 
-    // Only track mouse/keyboard interactions (avoid hiding UI on touch-only devices)
+    // Desktop interactions for idle tracking
     window.addEventListener('mousemove', resetTimer, { passive: true })
     window.addEventListener('mousedown', resetTimer, { passive: true })
     window.addEventListener('keydown', resetTimer)
@@ -39,4 +52,3 @@ export default function InactivityHide() {
 
   return null
 }
-
