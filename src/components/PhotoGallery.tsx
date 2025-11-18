@@ -263,7 +263,7 @@ export default function PhotoGallery({ photoShoots }: PhotoGalleryProps) {
               }`}
             />
             <ChevronRight
-              className={`pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-white/70 transition-opacity duration-300 ${
+              className={`hidden md:block pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-white/70 transition-opacity duration-300 ${
                 canScroll[shootIndex] && !fadedTitles.has(shootIndex) ? 'opacity-100' : 'opacity-0'
               } animate-pulse`}
               size={20}
