@@ -3,7 +3,14 @@ export const metadata = {
   description: 'About Taylor Diamond — multimedia artist and educator',
 }
 
-export default function BioPage() {
+import Image from 'next/image'
+import { getDjHeadshot } from '@/lib/cloudinary'
+
+export const dynamic = 'force-dynamic'
+
+export default async function BioPage() {
+  const headshot = await getDjHeadshot()
+
   return (
     <div className="min-h-screen bg-white text-black px-6 pt-24 pb-20">
       <div className="max-w-2xl mx-auto">
@@ -46,6 +53,19 @@ export default function BioPage() {
             as much as he’s loved making it.
           </p>
         </div>
+
+        {headshot && (
+          <div className="mt-8">
+            <Image
+              src={headshot.src}
+              alt={headshot.alt}
+              width={headshot.width}
+              height={headshot.height}
+              className="w-full h-auto object-contain"
+              sizes="(max-width: 768px) 92vw, 640px"
+            />
+          </div>
+        )}
 
         <div className="mt-10">
           <a href="mailto:taylor.diamond10@gmail.com" className="underline">Contact</a>
