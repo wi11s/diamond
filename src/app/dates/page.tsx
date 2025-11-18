@@ -1,27 +1,13 @@
 import { getDjFliers } from '@/lib/cloudinary'
 import FliersBackground from '@/components/FliersBackground'
 import Link from 'next/link'
+import { getEvents } from '@/lib/events'
 
-// Events
-const upcomingEvents = [
-  {
-    id: '1',
-    title: 'Halloween Costume Party (DJ Set)',
-    date: '2025-10-31',
-    venue: 'Private Brooklyn Location',
-    location: '',
-  },
-  {
-    id: '2',
-    title: 'DJ Set with imaginary friends',
-    date: '2025-11-06',
-    venue: 'Jade Bar',
-    location: 'Brooklyn',
-  },
-]
+// This page reads events via a CSV with ISR handled in lib/events
 
 export default async function Dates() {
   const fliers = await getDjFliers(36)
+  const upcomingEvents = (await getEvents()).filter(e => !!(e.id && e.id.trim()))
 
   return (
     <div className="relative min-h-screen text-black">
@@ -50,16 +36,22 @@ export default async function Dates() {
             </div>
             <section>
               <ul className="space-y-2 text-center">
-                {upcomingEvents.map((event) => (
+                {upcomingEvents.map((event) => {
+                  const parsed = event.date ? new Date(`${event.date}T00:00:00`) : null
+                  const dateStr = parsed && !isNaN(parsed.getTime())
+                    ? parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                    : (event.date || '')
+                  return (
                   <li key={event.id} className="text-sm leading-6">
-                    {new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    {dateStr}
                     {' — '}
                     {event.title}
                     {' — '}
                     {event.venue}
                     {event.location ? `, ${event.location}` : ''}
                   </li>
-                ))}
+                  )
+                })}
               </ul>
               <div className="mt-6 text-center">
                 <a href="mailto:taylor.diamond10@gmail.com" className="underline">Bookings</a>
