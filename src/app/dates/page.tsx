@@ -37,18 +37,37 @@ export default async function Dates() {
             <section>
               <ul className="space-y-2 text-center">
                 {upcomingEvents.map((event) => {
-                  const parsed = event.date ? new Date(`${event.date}T00:00:00`) : null
-                  const dateStr = parsed && !isNaN(parsed.getTime())
-                    ? parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                  let dt: Date | null = null
+                  if (event.date) {
+                    const raw = event.date.trim()
+                    const candidate = /T|\d{2}:\d{2}/.test(raw) ? raw : raw.replace(' ', 'T')
+                    const dtry = new Date(candidate)
+                    dt = isNaN(dtry.getTime()) ? null : dtry
+                  }
+                  const dateStr = dt
+                    ? dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
                     : (event.date || '')
+                  const timeStr = dt
+                    ? dt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+                    : ''
                   return (
                   <li key={event.id} className="text-sm leading-6">
-                    {dateStr}
+                    {dateStr}{timeStr ? `, ${timeStr}` : ''}
                     {' — '}
                     {event.title}
                     {' — '}
                     {event.venue}
                     {event.location ? `, ${event.location}` : ''}
+                    {event.link ? (
+                      <a
+                        href={event.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="ml-2 inline-block text-xs underline"
+                      >
+                        View
+                      </a>
+                    ) : null}
                   </li>
                   )
                 })}

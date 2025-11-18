@@ -84,11 +84,15 @@ export async function getEvents(): Promise<EventRow[]> {
 
     // Filter valid rows (must have id) and sort ascending by date if present
     const filtered = events.filter((e) => (e.id || '').trim() !== '')
-    const sorted = filtered.sort((a, b) => {
-      const ta = a.date ? new Date(`${a.date}T00:00:00`).getTime() : Number.MAX_SAFE_INTEGER
-      const tb = b.date ? new Date(`${b.date}T00:00:00`).getTime() : Number.MAX_SAFE_INTEGER
-      return ta - tb
-    })
+    const toTs = (val?: string) => {
+      if (!val) return Number.MAX_SAFE_INTEGER
+      const s = val.trim()
+      // If it looks like it has time, parse directly; otherwise, try ISO-ify "YYYY-MM-DD HH:mm" -> "YYYY-MM-DDTHH:mm"
+      const candidate = /T|\d{2}:\d{2}/.test(s) ? s : s.replace(' ', 'T')
+      const d = new Date(candidate)
+      return isNaN(d.getTime()) ? Number.MAX_SAFE_INTEGER : d.getTime()
+    }
+    const sorted = filtered.sort((a, b) => toTs(a.date) - toTs(b.date))
 
     return sorted
   } catch (err) {
