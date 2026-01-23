@@ -16,12 +16,14 @@ const navItems = [
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false)
   const pathname = usePathname()
-  const isLightNav = pathname === '/dates' || pathname === '/bio' || pathname === '/links'
+  const isLightNav = pathname === '/dates'
 
-  // On Dates page, nav links are rendered below the fliers section locally
-  if (pathname === '/dates') {
+  // On landing page, the page itself is navigation
+  if (pathname === '/') {
     return null
   }
+
+  const needsPillBg = pathname === '/dates'
 
   return (
     <>
@@ -29,7 +31,7 @@ export default function Navigation() {
       <nav className={`auto-hide fixed top-0 left-0 right-0 z-40 p-6`}>
         <div className="max-w-7xl mx-auto flex justify-end items-center">
           {/* Desktop Menu */}
-          <div className="hidden md:flex gap-8">
+          <div className={`hidden md:flex gap-8 ${needsPillBg ? 'bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full -mr-4 -mt-2' : ''}`}>
             {navItems.map((item) => (
               <Link
                 key={item.href}
@@ -49,7 +51,7 @@ export default function Navigation() {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className={`md:hidden p-2 ${isLightNav ? 'text-black' : 'text-white'}`}
+            className={`md:hidden p-2 rounded-full ${needsPillBg ? 'bg-white/90 backdrop-blur-sm' : ''} ${isLightNav ? 'text-black' : 'text-white'}`}
           >
             {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>

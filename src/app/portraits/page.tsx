@@ -1,4 +1,5 @@
 import PhotoGallery from '@/components/PhotoGallery'
+import GrainBackground from '@/components/GrainBackground'
 import { getPhotoShoots } from '@/lib/cloudinary'
 
 export const dynamic = 'force-dynamic'
@@ -35,6 +36,7 @@ export default async function PortraitsPage() {
 
   return (
     <div className="min-h-screen relative">
+      <GrainBackground />
       <PhotoGallery photoShoots={processed} />
     </div>
   )

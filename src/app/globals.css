@@ -7,13 +7,15 @@
 }
 
 html {
-  background: #fff;
+  background: #1c1c1c;
+  overscroll-behavior: none;
 }
 
 body {
-  background: #fff;
+  background: transparent;
   color: black;
   font-family: system-ui, -apple-system, sans-serif;
+  overscroll-behavior: none;
 }
 
 /* Auto-hide UI chrome on inactivity (toggled by .ui-idle on <html>) */
@@ -76,4 +78,22 @@ body {
     -webkit-mask-image: radial-gradient(ellipse at 50% 40%, transparent 0 24%, black 28% 100%);
     mask-image: radial-gradient(ellipse at 50% 40%, transparent 0 24%, black 28% 100%);
   }
+}
+
+/* Landing page - film photograph grey glass aesthetic */
+.landing-page {
+  background: #1c1c1c;
+  position: relative;
+  overflow: hidden;
+}
+
+.grain-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.35;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 200px 200px;
+  mix-blend-mode: overlay;
 }
