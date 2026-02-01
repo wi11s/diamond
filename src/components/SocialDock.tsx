@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 
 export default function SocialDock() {
   const pathname = usePathname()
-  const isLightPage = pathname === '/dates' || pathname === '/bio' || pathname === '/links'
+  const isLightPage = pathname === '/' || pathname === '/dates' || pathname === '/bio' || pathname === '/links'
   const needsPillBg = pathname === '/dates'
 
   const iconClass = isLightPage
