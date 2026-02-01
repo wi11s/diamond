@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useTransition, useEffect } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
 
 const navItems = [
@@ -15,13 +15,36 @@ const navItems = [
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false)
+  const [isPending, startTransition] = useTransition()
+  const [clickedHref, setClickedHref] = useState<string | null>(null)
   const pathname = usePathname()
-  const isLightNav = pathname === '/dates' || pathname === '/bio' || pathname === '/links'
+  const router = useRouter()
 
-  // On Dates page, nav links are rendered below the fliers section locally
-  if (pathname === '/dates') {
+  // Clear clicked state when navigation completes
+  useEffect(() => {
+    setClickedHref(null)
+  }, [pathname])
+
+  const handleNavClick = (e: React.MouseEvent, href: string) => {
+    e.preventDefault()
+    setClickedHref(href)
+    startTransition(() => {
+      router.push(href)
+    })
+  }
+
+  // Pages with white/light backgrounds need dark nav text
+  const isLightPage = pathname === '/dates' || pathname === '/bio' || pathname === '/links'
+  // Dates has a busy flier background so the nav needs a pill
+  const needsPillBg = pathname === '/dates'
+
+  // On landing page, the page itself is navigation
+  if (pathname === '/') {
     return null
   }
+
+  const textActive = isLightPage ? 'text-black' : 'text-white'
+  const textInactive = isLightPage ? 'text-black/70 hover:text-black' : 'text-white/70 hover:text-white'
 
   return (
     <>
@@ -29,27 +52,30 @@ export default function Navigation() {
       <nav className={`auto-hide fixed top-0 left-0 right-0 z-40 p-6`}>
         <div className="max-w-7xl mx-auto flex justify-end items-center">
           {/* Desktop Menu */}
-          <div className="hidden md:flex gap-8">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                prefetch
-                className={`text-sm font-medium transition-colors ${
-                  pathname === item.href
-                    ? (isLightNav ? 'text-black' : 'text-white')
-                    : (isLightNav ? 'text-black/70 hover:text-black' : 'text-white/70 hover:text-white')
-                }`}
-              >
-                {item.label}
-              </Link>
-            ))}
+          <div className={`hidden md:flex gap-8 ${needsPillBg ? 'bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full -mr-4 -mt-2' : ''}`}>
+            {navItems.map((item) => {
+              const isActive = pathname === item.href
+              const isLoading = isPending && clickedHref === item.href
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  prefetch
+                  onClick={(e) => handleNavClick(e, item.href)}
+                  className={`text-sm font-medium transition-all duration-150 ${
+                    isLoading ? 'opacity-50' : ''
+                  } ${isActive ? textActive : textInactive}`}
+                >
+                  {item.label}
+                </Link>
+              )
+            })}
           </div>
 
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className={`md:hidden p-2 ${isLightNav ? 'text-black' : 'text-white'}`}
+            className={`md:hidden p-2 rounded-full ${isLightPage ? 'text-black' : 'text-white'} ${needsPillBg ? 'bg-white/90 backdrop-blur-sm' : ''}`}
           >
             {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -69,21 +95,30 @@ export default function Navigation() {
             >
               <X size={24} />
             </button>
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setIsOpen(false)}
-                prefetch
-                className={`text-xl font-medium transition-colors ${
-                  pathname === item.href
-                    ? 'text-white'
-                    : 'text-white/70 hover:text-white'
-                }`}
-              >
-                {item.label}
-              </Link>
-            ))}
+            {navItems.map((item) => {
+              const isActive = pathname === item.href
+              const isLoading = isPending && clickedHref === item.href
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={(e) => {
+                    setIsOpen(false)
+                    handleNavClick(e, item.href)
+                  }}
+                  prefetch
+                  className={`text-xl font-medium transition-all duration-150 ${
+                    isLoading ? 'opacity-50' : ''
+                  } ${
+                    isActive
+                      ? 'text-white'
+                      : 'text-white/70 hover:text-white'
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              )
+            })}
           </div>
         </div>
       )}

@@ -420,10 +420,116 @@ export async function getDjFliers(limit = 24) {
   }
 }
 
-// Fetch all landscape photos (flattened) from the LANDSCAPE AND TRAVEL PHOTOGRAPHY folder
+// Fetch landscape photo shoots grouped by subfolder (same shape as getPhotoShoots)
+export async function getLandscapePhotoShoots() {
+  try {
+    const ROOT = 'LANDSCAPE'
+    const photoShoots: any[] = []
+
+    // Try subfolders API first
+    try {
+      const subfoldersResult = await cloudinary.api.sub_folders(ROOT)
+      const subfolders = subfoldersResult.folders
+
+      for (const subfolder of subfolders) {
+        try {
+          let searchPath = subfolder.path.replace(/"/g, '\\"')
+          if (searchPath.includes('*')) {
+            searchPath = searchPath.replace(/\*/g, '\\*')
+          }
+
+          let photosResult = await cloudinary.search
+            .expression(`folder:"${searchPath}"`)
+            .sort_by('created_at', 'desc')
+            .max_results(100)
+            .execute()
+
+          if (photosResult.resources.length === 0) {
+            photosResult = await cloudinary.search
+              .expression(`folder:${subfolder.path}`)
+              .sort_by('created_at', 'desc')
+              .max_results(100)
+              .execute()
+          }
+
+          const filtered = photosResult.resources.filter((resource: any) => {
+            const expectedFolderPath = `${ROOT}/${subfolder.name}`
+            const actualFolderPath = resource.asset_folder || resource.folder
+            return actualFolderPath === expectedFolderPath
+          })
+
+          const sorted = filtered
+            .map((resource: any, index: number) => ({
+              resource,
+              index,
+              name: (
+                resource.display_name ||
+                (resource.public_id || '').split('/').pop() ||
+                ''
+              ).toString()
+            }))
+            .sort((a: any, b: any) => {
+              const an = a.name.toLowerCase()
+              const bn = b.name.toLowerCase()
+              const cmp = an.localeCompare(bn, undefined, { sensitivity: 'base' })
+              if (cmp !== 0) return cmp
+              return a.index - b.index
+            })
+            .map(({ resource }: any) => resource)
+
+          const photos = sorted.map((resource: any) => ({
+            id: resource.public_id,
+            src: cloudinary.url(resource.public_id, {
+              quality: 'auto',
+              fetch_format: 'auto',
+              width: 2400,
+              crop: 'fit',
+              dpr: 'auto'
+            }),
+            alt: resource.display_name || subfolder.name,
+            width: resource.width || 2400,
+            height: resource.height || 1600,
+            public_id: resource.public_id
+          }))
+
+          if (photos.length > 0) {
+            photoShoots.push({
+              name: subfolder.name,
+              photos,
+            })
+          }
+        } catch (error) {
+          console.error(`Error fetching landscape photos for ${subfolder.name}:`, error)
+        }
+      }
+    } catch (e) {
+      console.warn('Landscape subfolders unavailable.')
+    }
+
+    // If we found shoots, return them
+    if (photoShoots.length > 0) return photoShoots
+
+    // Fallback: flatten all landscape photos into a single shoot
+    const flatPhotos = await getLandscapePhotos()
+    if (flatPhotos.length > 0) {
+      return [{ name: 'Landscape & Travel', photos: flatPhotos }]
+    }
+
+    return []
+  } catch (error) {
+    console.warn('Falling back to flat landscape photos.')
+    const flatPhotos = await getLandscapePhotos()
+    if (flatPhotos.length > 0) {
+      return [{ name: 'Landscape & Travel', photos: flatPhotos }]
+    }
+    return []
+  }
+}
+
+// Fetch all landscape photos (flattened) from the LANDSCAPE folder
 export async function getLandscapePhotos() {
   try {
-    const ROOT = 'LANDSCAPE AND TRAVEL PHOTOGRAPHY'
+    const ROOT = 'LANDSCAPE'
 
     const buildPhoto = (resource: any, altFallback: string) => ({
       id: resource.public_id,

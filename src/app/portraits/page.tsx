@@ -1,7 +1,7 @@
 import PhotoGallery from '@/components/PhotoGallery'
 import { getPhotoShoots } from '@/lib/cloudinary'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 3600
 
 export default async function PortraitsPage() {
   const allShoots: any[] = await getPhotoShoots()

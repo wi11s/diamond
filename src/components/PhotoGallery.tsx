@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import Image from 'next/image'
 import { ChevronRight } from 'lucide-react'
 
@@ -30,7 +30,14 @@ export default function PhotoGallery({ photoShoots }: PhotoGalleryProps) {
   const firstImageRefs = useRef<Record<number, HTMLDivElement | null>>({})
   const [titleMaxWidths, setTitleMaxWidths] = useState<Record<number, number>>({})
   const [canScroll, setCanScroll] = useState<Record<number, boolean>>({})
-  const holdScroll = useRef<Record<number, { raf: number | null; dir: -1 | 1; last: number }>>({})
+
+  // Drag-to-scroll state
+  const dragState = useRef<Record<number, {
+    isDown: boolean
+    startX: number
+    scrollLeft: number
+    dragged: boolean
+  }>>({})
 
   const measureFirstImage = (index: number) => {
     const el = firstImageRefs.current[index]
@@ -45,23 +52,7 @@ export default function PhotoGallery({ photoShoots }: PhotoGalleryProps) {
     }
   }
 
-  const scrollRef = useRef<HTMLDivElement>(null)
-
-  const scrollLeft = (containerId: string) => {
-    const container = document.getElementById(containerId)
-    if (container) {
-      container.scrollBy({ left: -400, behavior: 'smooth' })
-    }
-  }
-
-  const scrollRight = (containerId: string) => {
-    const container = document.getElementById(containerId)
-    if (container) {
-      container.scrollBy({ left: 400, behavior: 'smooth' })
-    }
-  }
-
-  // Handle scroll events to fade titles (only update when state changes)
+  // Handle scroll events to fade titles
   useEffect(() => {
     const handleScroll = (event: Event) => {
       const target = event.target as HTMLElement
@@ -84,29 +75,22 @@ export default function PhotoGallery({ photoShoots }: PhotoGalleryProps) {
       })
     }
 
-    // Add scroll listeners to all scroll containers
     photoShoots.forEach((_, index) => {
       const container = document.getElementById(`scroll-container-${index}`)
       if (container) {
         container.addEventListener('scroll', handleScroll)
-        // Determine if this container is horizontally scrollable
         setCanScroll(prev => ({
           ...prev,
           [index]: container.scrollWidth > container.clientWidth + 1,
         }))
-
-        // No scroll listeners here; hover zones below handle auto-scroll
-        ;(container as any)._autoScrollCleanup = () => {}
       }
     })
 
     return () => {
-      // Cleanup listeners
       photoShoots.forEach((_, index) => {
         const container = document.getElementById(`scroll-container-${index}`)
         if (container) {
           container.removeEventListener('scroll', handleScroll)
-          if ((container as any)._autoScrollCleanup) (container as any)._autoScrollCleanup()
         }
       })
     }
@@ -116,7 +100,6 @@ export default function PhotoGallery({ photoShoots }: PhotoGalleryProps) {
   useEffect(() => {
     const onResize = () => {
       photoShoots.forEach((_, idx) => measureFirstImage(idx))
-      // Re-check scrollability on resize
       photoShoots.forEach((_, idx) => {
         const container = document.getElementById(`scroll-container-${idx}`)
         if (container) {
@@ -132,47 +115,55 @@ export default function PhotoGallery({ photoShoots }: PhotoGalleryProps) {
     return () => window.removeEventListener('resize', onResize)
   }, [photoShoots])
 
-  // Clear any running hold-scroll animations on unmount
-  useEffect(() => {
-    return () => {
-      Object.values(holdScroll.current).forEach((st) => {
-        if (st?.raf) cancelAnimationFrame(st.raf)
-      })
-      holdScroll.current = {}
+  // Drag-to-scroll handlers
+  const onMouseDown = useCallback((e: React.MouseEvent, index: number) => {
+    const container = document.getElementById(`scroll-container-${index}`)
+    if (!container) return
+    dragState.current[index] = {
+      isDown: true,
+      startX: e.pageX - container.offsetLeft,
+      scrollLeft: container.scrollLeft,
+      dragged: false,
     }
+    container.style.cursor = 'grabbing'
   }, [])
 
-  const startHoldScroll = (index: number, dir: -1 | 1) => {
-    const el = document.getElementById(`scroll-container-${index}`) as HTMLElement | null
-    if (!el) return
-    if (!(el.scrollWidth > el.clientWidth + 1)) return
-    if (!holdScroll.current[index]) holdScroll.current[index] = { raf: null, dir, last: performance.now() }
-    const st = holdScroll.current[index]
-    st.dir = dir
-    if (st.raf) return
-    const MAX = 350 // px/s (slow, smooth)
-    const step = (ts: number) => {
-      const state = holdScroll.current[index]
-      if (!state) return
-      const dt = state.last ? (ts - state.last) / 1000 : 0
-      state.last = ts
-      const dist = MAX * dt * state.dir
-      const maxScroll = el.scrollWidth - el.clientWidth
-      el.scrollLeft = Math.max(0, Math.min(maxScroll, el.scrollLeft + dist))
-      state.raf = requestAnimationFrame(step)
+  const onMouseMove = useCallback((e: React.MouseEvent, index: number) => {
+    const state = dragState.current[index]
+    if (!state?.isDown) return
+    const container = document.getElementById(`scroll-container-${index}`)
+    if (!container) return
+    e.preventDefault()
+    const x = e.pageX - container.offsetLeft
+    const walk = x - state.startX
+    if (Math.abs(walk) > 5) {
+      state.dragged = true
     }
-    st.last = performance.now()
-    st.raf = requestAnimationFrame(step)
-  }
+    container.scrollLeft = state.scrollLeft - walk
+  }, [])
 
-  const stopHoldScroll = (index: number) => {
-    const st = holdScroll.current[index]
-    if (!st) return
-    if (st.raf) cancelAnimationFrame(st.raf)
-    holdScroll.current[index] = { raf: null, dir: st.dir, last: performance.now() }
-  }
+  const onMouseUp = useCallback((index: number) => {
+    const state = dragState.current[index]
+    if (!state) return
+    state.isDown = false
+    const container = document.getElementById(`scroll-container-${index}`)
+    if (container) container.style.cursor = 'grab'
+  }, [])
 
-  // console.debug('photoShoots', photoShoots)
+  const onMouseLeave = useCallback((index: number) => {
+    const state = dragState.current[index]
+    if (!state) return
+    state.isDown = false
+    const container = document.getElementById(`scroll-container-${index}`)
+    if (container) container.style.cursor = 'grab'
+  }, [])
+
+  const handlePhotoClick = useCallback((photo: Photo, shootIndex: number) => {
+    const state = dragState.current[shootIndex]
+    // Only open if user didn't drag
+    if (state?.dragged) return
+    setSelectedPhoto(photo)
+  }, [])
 
   // Reset expanded loader when a new photo is opened
   useEffect(() => {
@@ -181,14 +172,13 @@ export default function PhotoGallery({ photoShoots }: PhotoGalleryProps) {
 
   return (
     <div className="min-h-screen bg-white text-black">
-      {/* Unified layout (mobile + desktop): horizontal scroll by shoots */}
       {photoShoots.map((shoot, shootIndex) => (
-        <section 
-          key={shoot.name} 
-          className="h-screen relative overflow-y-hidden border-t border-white"
+        <section
+          key={shoot.name}
+          className="h-screen relative overflow-y-hidden"
         >
           {/* Static Photoshoot Title at bottom */}
-          <div 
+          <div
             className={`absolute bottom-8 left-8 z-10 transition-opacity duration-300 pointer-events-none ${
               fadedTitles.has(shootIndex) ? 'opacity-0' : 'opacity-100'
             }`}
@@ -198,27 +188,29 @@ export default function PhotoGallery({ photoShoots }: PhotoGalleryProps) {
               {shoot.name}
             </h2>
           </div>
-          
+
           <div className="relative h-screen overflow-hidden">
             <div
               id={`scroll-container-${shootIndex}`}
               className="flex overflow-x-auto overflow-y-hidden scrollbar-hide h-screen select-none"
-              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', cursor: 'grab' }}
+              onMouseDown={(e) => onMouseDown(e, shootIndex)}
+              onMouseMove={(e) => onMouseMove(e, shootIndex)}
+              onMouseUp={() => onMouseUp(shootIndex)}
+              onMouseLeave={() => onMouseLeave(shootIndex)}
             >
               {Array.from(new Map(shoot.photos.map((p) => [p.id, p])).values()).map((photo, idx) => (
                 <div
                   key={`${photo.id}-${idx}`}
-                  className="flex-shrink-0 cursor-pointer group/photo h-screen border-l border-y border-white first:border-l-0"
-                  onClick={() => setSelectedPhoto(photo)}
+                  className="flex-shrink-0 cursor-pointer h-screen"
+                  onClick={() => handlePhotoClick(photo, shootIndex)}
                 >
                   <div
                     className="relative w-auto h-screen overflow-hidden"
                     ref={(el) => {
                       if (idx === 0) {
                         firstImageRefs.current[shootIndex] = el
-                        // try to measure asap if element already laid out
                         if (el) {
-                          // Defer to next frame to ensure layout
                           requestAnimationFrame(() => measureFirstImage(shootIndex))
                         }
                       }
@@ -229,7 +221,7 @@ export default function PhotoGallery({ photoShoots }: PhotoGalleryProps) {
                       alt={photo.alt}
                       width={photo.width}
                       height={photo.height}
-                      className="h-screen w-auto object-contain transition-transform duration-300"
+                      className="h-screen w-auto object-contain"
                       draggable={false}
                       onLoadingComplete={() => {
                         setLoadedIds((prev) => { const next = new Set(prev); next.add(photo.id); return next })
@@ -239,23 +231,10 @@ export default function PhotoGallery({ photoShoots }: PhotoGalleryProps) {
                     />
                     {/* Loading skeleton overlay */}
                     <div className={`${loadedIds.has(photo.id) ? 'opacity-0' : 'opacity-100'} absolute inset-0 bg-gradient-to-b from-black/10 to-transparent animate-pulse transition-opacity duration-500`} />
-                    {/* Dark-to-light hover overlay (slightly lighter by default) */}
-                    <div className="absolute inset-0 bg-black/25 group-hover/photo:bg-black/0 transition-all duration-300" />
                   </div>
                 </div>
               ))}
             </div>
-            {/* Edge hover zones for auto-scroll; do not block vertical page scroll */}
-            <div
-              className="absolute inset-y-0 left-0 w-24 z-30 pointer-events-auto"
-              onMouseEnter={() => startHoldScroll(shootIndex, -1)}
-              onMouseLeave={() => stopHoldScroll(shootIndex)}
-            />
-            <div
-              className="absolute inset-y-0 right-0 w-24 z-30 pointer-events-auto"
-              onMouseEnter={() => startHoldScroll(shootIndex, 1)}
-              onMouseLeave={() => stopHoldScroll(shootIndex)}
-            />
             {/* Subtle scroll hint: right-edge gradient + chevron, hidden after scroll */}
             <div
               className={`pointer-events-none absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-black/20 to-transparent transition-opacity duration-300 ${
@@ -271,8 +250,6 @@ export default function PhotoGallery({ photoShoots }: PhotoGalleryProps) {
           </div>
         </section>
       ))}
-
-      {/* Mobile page navigation uses the global Navigation component's button; no duplicate here. */}
 
       {selectedPhoto && (
         <div
@@ -295,7 +272,6 @@ export default function PhotoGallery({ photoShoots }: PhotoGalleryProps) {
                 unoptimized
                 onLoadingComplete={() => setIsExpandedLoaded(true)}
               />
-              {/* Loading overlay: match page spinner */}
               <div
                 className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 ${
                   isExpandedLoaded ? 'opacity-0' : 'opacity-100'

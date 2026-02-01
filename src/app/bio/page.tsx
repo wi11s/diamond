@@ -6,14 +6,14 @@ export const metadata = {
 import Image from 'next/image'
 import { getDjHeadshot } from '@/lib/cloudinary'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 3600
 
 export default async function BioPage() {
   const headshot = await getDjHeadshot()
 
   return (
-    <div className="min-h-screen bg-white text-black px-6 pt-24 pb-20">
-      <div className="max-w-2xl mx-auto">
+    <div className="min-h-screen text-black bg-white px-6 pt-24 pb-20 relative">
+      <div className="max-w-2xl mx-auto relative z-10">
         <h1 className="text-2xl font-semibold mb-6">Bio</h1>
         <div className="space-y-5 text-sm leading-7 text-black/90">
           <p>
@@ -55,7 +55,7 @@ export default async function BioPage() {
         </div>
 
         {headshot && (
-          <div className="mt-8">
+          <div className="mt-8 relative">
             <Image
               src={headshot.src}
               alt={headshot.alt}
