@@ -17,7 +17,7 @@ export default function Home() {
             <li key={page.href}>
               <Link
                 href={page.href}
-                className="text-black/70 hover:text-black text-xs font-light tracking-widest uppercase transition-colors duration-200"
+                className="text-black/70 hover:text-black text-sm font-medium transition-colors duration-150"
               >
                 {page.label}
               </Link>
