@@ -3,7 +3,7 @@ import FliersBackground from '@/components/FliersBackground'
 import Link from 'next/link'
 import { getEvents } from '@/lib/events'
 
-// This page reads events via a CSV with ISR handled in lib/events
+export const revalidate = 3600
 
 export default async function Dates() {
   const fliers = await getDjFliers(36)

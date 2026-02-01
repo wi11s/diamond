@@ -1,5 +1,3 @@
-import GrainBackground from '@/components/GrainBackground'
-
 export const metadata = {
   title: 'Links — Taylor Diamond',
   description: 'Selected videos and projects',
@@ -17,8 +15,7 @@ const links: { title: string; href: string }[] = [
 
 export default function LinksPage() {
   return (
-    <div className="min-h-screen text-white px-6 pt-24 pb-20 relative">
-      <GrainBackground />
+    <div className="min-h-screen text-black bg-white px-6 pt-24 pb-20 relative">
       <div className="max-w-2xl mx-auto relative z-10">
         <h1 className="text-2xl font-semibold mb-6">Links</h1>
         <ul className="space-y-3 text-sm">

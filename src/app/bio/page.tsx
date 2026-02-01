@@ -4,20 +4,18 @@ export const metadata = {
 }
 
 import Image from 'next/image'
-import GrainBackground from '@/components/GrainBackground'
 import { getDjHeadshot } from '@/lib/cloudinary'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 3600
 
 export default async function BioPage() {
   const headshot = await getDjHeadshot()
 
   return (
-    <div className="min-h-screen text-white px-6 pt-24 pb-20 relative">
-      <GrainBackground />
+    <div className="min-h-screen text-black bg-white px-6 pt-24 pb-20 relative">
       <div className="max-w-2xl mx-auto relative z-10">
         <h1 className="text-2xl font-semibold mb-6">Bio</h1>
-        <div className="space-y-5 text-sm leading-7 text-white/90">
+        <div className="space-y-5 text-sm leading-7 text-black/90">
           <p>
             Taylor Diamond is a Brooklyn-based multimedia artist and educator working across analog photography,
             filmmaking, and music culture. His practice is rooted in storytelling through analog processes, driven by a

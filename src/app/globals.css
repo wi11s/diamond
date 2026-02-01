@@ -7,7 +7,7 @@
 }
 
 html {
-  background: #1c1c1c;
+  background: white;
   overscroll-behavior: none;
 }
 
@@ -82,7 +82,7 @@ body {
 
 /* Landing page - film photograph grey glass aesthetic */
 .landing-page {
-  background: #1c1c1c;
+  background: white;
   position: relative;
   overflow: hidden;
 }
