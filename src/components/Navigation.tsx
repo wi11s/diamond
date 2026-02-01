@@ -38,8 +38,8 @@ export default function Navigation() {
   // Dates has a busy flier background so the nav needs a pill
   const needsPillBg = pathname === '/dates'
 
-  // On landing page, the page itself is navigation
-  if (pathname === '/') {
+  // On landing page, the page itself is navigation; scroll page has no UI
+  if (pathname === '/' || pathname === '/scroll') {
     return null
   }
 

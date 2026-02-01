@@ -5,6 +5,9 @@ import { usePathname } from 'next/navigation'
 
 export default function SocialDock() {
   const pathname = usePathname()
+
+  if (pathname === '/scroll') return null
+
   const isLightPage = pathname === '/' || pathname === '/dates' || pathname === '/bio' || pathname === '/links'
   const needsPillBg = pathname === '/dates'
 

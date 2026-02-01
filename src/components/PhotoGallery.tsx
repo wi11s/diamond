@@ -232,7 +232,7 @@ export default function PhotoGallery({ photoShoots }: PhotoGalleryProps) {
                     {/* Loading skeleton overlay */}
                     <div className={`${loadedIds.has(photo.id) ? 'opacity-0' : 'opacity-100'} absolute inset-0 bg-gradient-to-b from-black/10 to-transparent animate-pulse transition-opacity duration-500`} />
                     {/* Expand icon */}
-                    <div className="auto-hide absolute top-4 right-4 text-white/70 drop-shadow-lg pointer-events-none">
+                    <div className="auto-hide absolute bottom-4 right-4 text-white/70 drop-shadow-lg pointer-events-none">
                       <Maximize2 size={16} />
                     </div>
                   </div>

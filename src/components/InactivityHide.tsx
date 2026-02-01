@@ -1,11 +1,14 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import { usePathname } from 'next/navigation'
 
 export default function InactivityHide() {
+  const pathname = usePathname()
   const timerRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
+    if (pathname === '/scroll') return
     const root = document.documentElement
 
     // On mobile/touch devices, keep UI always visible
@@ -48,7 +51,7 @@ export default function InactivityHide() {
       window.removeEventListener('mousedown', resetTimer as any)
       window.removeEventListener('keydown', resetTimer as any)
     }
-  }, [])
+  }, [pathname])
 
   return null
 }
