@@ -5,6 +5,7 @@ import Navigation from '@/components/Navigation'
 import SocialDock from '@/components/SocialDock'
 import UsageNotice from '@/components/UsageNotice'
 import InactivityHide from '@/components/InactivityHide'
+import { Analytics } from "@vercel/analytics/next"
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -30,6 +31,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <Analytics />      
       <body className={inter.className}>
         <InactivityHide />
         <Navigation />
