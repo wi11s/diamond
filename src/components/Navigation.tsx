@@ -52,7 +52,7 @@ export default function Navigation() {
       <nav className={`auto-hide fixed top-0 left-0 right-0 z-40 p-6`}>
         <div className="max-w-7xl mx-auto flex justify-end items-center">
           {/* Desktop Menu */}
-          <div className={`hidden md:flex gap-8 ${needsPillBg ? 'bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full -mr-4 -mt-2' : ''}`}>
+          <div className={`hidden md:flex items-center gap-8 ${needsPillBg ? 'bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full -mr-4 -mt-2' : ''}`}>
             {navItems.map((item) => {
               const isActive = pathname === item.href
               const isLoading = isPending && clickedHref === item.href
@@ -70,6 +70,16 @@ export default function Navigation() {
                 </Link>
               )
             })}
+            <a
+              href="mailto:taylordiamond10@gmail.com"
+              className={`text-xs font-medium tracking-widest uppercase border px-4 py-1.5 rounded-full transition-all duration-150 ${
+                isLightPage
+                  ? 'border-black/30 hover:border-black/70 text-black/60 hover:text-black'
+                  : 'border-white/30 hover:border-white/70 text-white/60 hover:text-white'
+              }`}
+            >
+              Work with me
+            </a>
           </div>
 
           {/* Mobile Menu Button */}
@@ -119,6 +129,13 @@ export default function Navigation() {
                 </Link>
               )
             })}
+            <a
+              href="mailto:taylordiamond10@gmail.com"
+              onClick={() => setIsOpen(false)}
+              className="text-xs font-medium tracking-widest uppercase border border-white/30 hover:border-white/70 text-white/60 hover:text-white px-6 py-2 rounded-full transition-all duration-150 mt-4"
+            >
+              Work with me
+            </a>
           </div>
         </div>
       )}

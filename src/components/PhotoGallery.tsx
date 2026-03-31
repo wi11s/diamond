@@ -30,6 +30,12 @@ export default function PhotoGallery({ photoShoots }: PhotoGalleryProps) {
   const firstImageRefs = useRef<Record<number, HTMLDivElement | null>>({})
   const [titleMaxWidths, setTitleMaxWidths] = useState<Record<number, number>>({})
   const [canScroll, setCanScroll] = useState<Record<number, boolean>>({})
+  const [showHint, setShowHint] = useState(true)
+
+  useEffect(() => {
+    const t = setTimeout(() => setShowHint(false), 2000)
+    return () => clearTimeout(t)
+  }, [])
 
   // Drag-to-scroll state
   const dragState = useRef<Record<number, {
@@ -172,6 +178,21 @@ export default function PhotoGallery({ photoShoots }: PhotoGalleryProps) {
 
   return (
     <div className="min-h-screen bg-white text-black">
+      {/* Swipe hint popup */}
+      <div
+        className={`fixed inset-0 z-50 flex items-center justify-center pointer-events-none transition-opacity duration-500 ${showHint ? 'opacity-100' : 'opacity-0'}`}
+      >
+        <div className="bg-black/70 text-white rounded-2xl px-6 py-4 flex flex-col items-center gap-2 backdrop-blur-sm">
+          <div className="flex items-center gap-2 text-sm font-medium">
+            <span>↕</span>
+            <span>Swipe up &amp; down to browse shoots</span>
+          </div>
+          <div className="flex items-center gap-2 text-sm font-medium">
+            <span>↔</span>
+            <span>Swipe side to side for photos</span>
+          </div>
+        </div>
+      </div>
       {photoShoots.map((shoot, shootIndex) => (
         <section
           key={shoot.name}
