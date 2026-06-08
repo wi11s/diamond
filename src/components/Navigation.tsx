@@ -24,6 +24,7 @@ export default function Navigation() {
 
   const isGalleryPage = pathname?.startsWith('/portraits') || pathname?.startsWith('/landscape')
   const plainStyle = pathname === '/links' || pathname === '/bio' || (isGalleryPage && !photosLoaded)
+  const whiteText = pathname === '/bio'
 
   useEffect(() => {
     setClickedHref(null)
@@ -45,14 +46,17 @@ export default function Navigation() {
         <div className="flex-1 hidden md:block" />
 
         {/* Centered pill */}
-        <div className={`auto-hide hidden md:flex items-center gap-10 px-10 py-4 rounded-full ${plainStyle ? '' : 'invert-pill'}`}>
+        <div
+          className={`auto-hide hidden md:flex items-center gap-10 px-10 py-4 rounded-full ${plainStyle ? (whiteText ? 'text-white' : '') : 'invert-pill'}`}
+          style={pathname === '/dates' ? { backdropFilter: 'invert(1) blur(16px)', WebkitBackdropFilter: 'invert(1) blur(16px)' } : undefined}
+        >
           {navItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
               prefetch
               onClick={(e) => handleNavClick(e, item.href)}
-              className={`text-xl font-bold transition-opacity duration-150 ${
+              className={`text-xl font-bold uppercase tracking-widest transition-opacity duration-150 ${
                 isPending && clickedHref === item.href
                   ? 'opacity-40'
                   : pathname === item.href
@@ -69,7 +73,8 @@ export default function Navigation() {
         <div className="flex-1 hidden md:flex justify-end">
           <a
             href="mailto:taylordiamond10@gmail.com"
-            className="auto-hide invert-pill text-sm font-bold tracking-widest uppercase px-5 py-2.5 rounded-full"
+            className={`auto-hide text-sm font-bold tracking-widest uppercase px-5 py-2.5 rounded-full ${plainStyle ? 'invert-blend' : 'invert-pill'}`}
+            style={pathname === '/dates' ? { backdropFilter: 'invert(1) blur(16px)', WebkitBackdropFilter: 'invert(1) blur(16px)' } : undefined}
           >
             Work with me
           </a>

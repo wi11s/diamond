@@ -37,17 +37,17 @@ export default async function BioPage() {
   const [headshot, paragraphs] = await Promise.all([getDjHeadshot(), getBioParagraphs()])
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative py-20">
+    <div className="min-h-screen flex items-center justify-center relative py-32">
       <Image
-        src="https://res.cloudinary.com/dpaytjafy/image/upload/v1755557549/IMG_7764_dnee02.jpg"
+        src="https://res.cloudinary.com/dpaytjafy/image/upload/v1755557536/IMG_7732_cnnrk4.jpg"
         alt=""
         fill
         className="object-cover"
         priority
         unoptimized
       />
-      <div className="invert-pill relative z-10 max-w-2xl mx-auto px-12 py-10 rounded-3xl">
-        <div className="space-y-5 text-sm leading-7">
+      <div className="relative z-10 max-w-2xl mx-auto px-12 py-10">
+        <div className="invert-blend space-y-5 text-sm leading-7">
           {paragraphs.map((p, i) => (
             <p key={i}>{renderWithItalics(p)}</p>
           ))}
@@ -66,8 +66,8 @@ export default async function BioPage() {
           </div>
         )}
 
-        <div className="mt-10">
-          <a href="mailto:taylor.diamond10@gmail.com" className="underline opacity-80 hover:opacity-100">Contact</a>
+        <div className="invert-blend mt-10">
+          <a href="mailto:taylor.diamond10@gmail.com" className="underline">Contact</a>
         </div>
       </div>
     </div>

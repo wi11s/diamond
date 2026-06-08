@@ -18,7 +18,7 @@ export default async function Dates() {
 
       {/* Centered white card with dates */}
       <div className="fixed inset-0 flex items-center justify-center z-30 pointer-events-none">
-        <div className="invert-pill rounded-3xl px-8 py-8 w-[min(92vw,720px)] pointer-events-auto">
+        <div className="invert-pill rounded-3xl px-8 py-8 w-[min(92vw,720px)] pointer-events-auto" style={{ backdropFilter: 'invert(1) blur(16px)', WebkitBackdropFilter: 'invert(1) blur(16px)' }}>
           <div>
             <section>
               <ul className="space-y-2 text-center">

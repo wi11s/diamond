@@ -38,7 +38,7 @@ export default async function LinksPage() {
   return (
     <div className="min-h-screen flex items-center justify-center relative">
       <Image
-        src="https://res.cloudinary.com/dpaytjafy/image/upload/v1755557549/IMG_7764_dnee02.jpg"
+        src="https://res.cloudinary.com/dpaytjafy/image/upload/v1755556468/IMG_5071_kwkkun.jpg"
         alt=""
         fill
         className="object-cover"
