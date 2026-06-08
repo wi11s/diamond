@@ -37,14 +37,14 @@ export default function Navigation() {
       {/* Desktop nav */}
       <nav className="ui-chrome auto-hide invert-blend fixed top-0 left-0 right-0 z-40 p-6">
         <div className="max-w-7xl mx-auto flex justify-center items-center">
-          <div className="invert-pill hidden md:flex items-center gap-8 px-6 py-2.5 rounded-full">
+          <div className="invert-pill hidden md:flex items-center gap-12 px-10 py-4 rounded-full">
             {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 prefetch
                 onClick={(e) => handleNavClick(e, item.href)}
-                className={`text-lg font-bold transition-opacity duration-150 ${
+                className={`text-3xl font-bold transition-opacity duration-150 ${
                   isPending && clickedHref === item.href ? 'opacity-50' : ''
                 }`}
               >
