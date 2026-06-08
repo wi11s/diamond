@@ -40,7 +40,7 @@ export default function Navigation() {
   return (
     <>
       {/* Desktop nav */}
-      <nav className={`ui-chrome auto-hide fixed top-0 left-0 right-0 z-40 p-6 flex items-center ${plainStyle ? 'text-black' : 'invert-blend'}`}>
+      <nav className="ui-chrome auto-hide fixed top-0 left-0 right-0 z-40 p-6 flex items-center">
         {/* Left spacer */}
         <div className="flex-1 hidden md:block" />
 
@@ -69,7 +69,7 @@ export default function Navigation() {
         <div className="flex-1 hidden md:flex justify-end">
           <a
             href="mailto:taylordiamond10@gmail.com"
-            className="bg-black text-white text-sm font-bold tracking-widest uppercase px-5 py-2.5 rounded-full"
+            className="invert-pill text-sm font-bold tracking-widest uppercase px-5 py-2.5 rounded-full"
           >
             Work with me
           </a>

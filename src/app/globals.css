@@ -27,10 +27,10 @@ body {
 
 /* Pill shape used inside an invert-blend parent — white bg inverts, black text punches through */
 .invert-pill {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  color: black;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: invert(1);
+  -webkit-backdrop-filter: invert(1);
+  color: white;
 }
 
 /* All UI chrome: hidden while loading, fade in on mount */
