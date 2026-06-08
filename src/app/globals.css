@@ -25,6 +25,24 @@ body {
   color: white;
 }
 
+/* Pill shape used inside an invert-blend parent — white bg inverts, black text punches through */
+.invert-pill {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: black;
+}
+
+/* All UI chrome: hidden while loading, fade in on mount */
+.ui-chrome {
+  transition: opacity 300ms ease;
+}
+html.ui-loading .ui-chrome,
+html.ui-loading .auto-hide {
+  opacity: 0;
+  pointer-events: none;
+}
+
 /* Auto-hide UI chrome on inactivity (toggled by .ui-idle on <html>) */
 .auto-hide {
   transition: opacity 300ms ease;

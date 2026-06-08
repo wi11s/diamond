@@ -30,9 +30,10 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <Analytics />      
+    <html lang="en" suppressHydrationWarning>
+      <Analytics />
       <body className={inter.className}>
+        <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('ui-loading')" }} />
         <InactivityHide />
         <Navigation />
         <main className="min-h-screen">

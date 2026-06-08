@@ -34,30 +34,23 @@ export default function Navigation() {
 
   return (
     <>
-      <nav className="invert-blend fixed top-0 left-0 right-0 z-40 p-6">
+      {/* Desktop nav */}
+      <nav className="ui-chrome auto-hide invert-blend fixed top-0 left-0 right-0 z-40 p-6">
         <div className="max-w-7xl mx-auto flex justify-center items-center">
-
-          {/* Desktop */}
-          <div className="hidden md:flex items-center gap-8 px-4 py-2 -mr-4 -mt-2">
+          <div className="invert-pill hidden md:flex items-center gap-8 px-6 py-2.5 rounded-full">
             {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 prefetch
                 onClick={(e) => handleNavClick(e, item.href)}
-                className={`text-base font-medium transition-all duration-150 ${
+                className={`text-lg font-bold transition-opacity duration-150 ${
                   isPending && clickedHref === item.href ? 'opacity-50' : ''
-                } text-white`}
+                }`}
               >
                 {item.label}
               </Link>
             ))}
-            <a
-              href="mailto:taylordiamond10@gmail.com"
-              className="text-sm font-medium tracking-widest uppercase border border-white text-white px-4 py-1.5 rounded-full transition-all duration-150"
-            >
-              Work with me
-            </a>
           </div>
 
           {/* Mobile toggle */}
@@ -69,6 +62,14 @@ export default function Navigation() {
           </button>
         </div>
       </nav>
+
+      {/* Work with me — top right */}
+      <a
+        href="mailto:taylordiamond10@gmail.com"
+        className="ui-chrome auto-hide invert-blend fixed top-6 right-6 z-40 hidden md:block bg-black text-sm font-bold tracking-widest uppercase px-5 py-2.5 rounded-full"
+      >
+        Work with me
+      </a>
 
       {/* Mobile menu */}
       {isOpen && (
@@ -98,7 +99,7 @@ export default function Navigation() {
             <a
               href="mailto:taylordiamond10@gmail.com"
               onClick={() => setIsOpen(false)}
-              className="text-xs font-medium tracking-widest uppercase border border-white/30 hover:border-white/70 text-white/60 hover:text-white px-6 py-2 rounded-full transition-all duration-150 mt-4"
+              className="text-xs font-bold tracking-widest uppercase bg-white text-black px-6 py-2.5 rounded-full mt-4"
             >
               Work with me
             </a>

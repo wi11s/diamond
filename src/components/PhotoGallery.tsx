@@ -25,7 +25,6 @@ interface PhotoGalleryProps {
 export default function PhotoGallery({ photoShoots }: PhotoGalleryProps) {
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null)
   const [loadedIds, setLoadedIds] = useState<Set<string>>(new Set())
-  const [fadedTitles, setFadedTitles] = useState<Set<number>>(new Set())
   const [isExpandedLoaded, setIsExpandedLoaded] = useState(false)
   const firstImageRefs = useRef<Record<number, HTMLDivElement | null>>({})
   const [titleMaxWidths, setTitleMaxWidths] = useState<Record<number, number>>({})
@@ -58,48 +57,16 @@ export default function PhotoGallery({ photoShoots }: PhotoGalleryProps) {
     }
   }
 
-  // Handle scroll events to fade titles
   useEffect(() => {
-    const handleScroll = (event: Event) => {
-      const target = event.target as HTMLElement
-      const shootIndex = parseInt(target.id.replace('scroll-container-', ''))
-      if (isNaN(shootIndex)) return
-      const beyond = target.scrollLeft > 10
-      setFadedTitles(prev => {
-        const has = prev.has(shootIndex)
-        if (beyond && !has) {
-          const next = new Set(prev)
-          next.add(shootIndex)
-          return next
-        }
-        if (!beyond && has) {
-          const next = new Set(prev)
-          next.delete(shootIndex)
-          return next
-        }
-        return prev
-      })
-    }
-
     photoShoots.forEach((_, index) => {
       const container = document.getElementById(`scroll-container-${index}`)
       if (container) {
-        container.addEventListener('scroll', handleScroll)
         setCanScroll(prev => ({
           ...prev,
           [index]: container.scrollWidth > container.clientWidth + 1,
         }))
       }
     })
-
-    return () => {
-      photoShoots.forEach((_, index) => {
-        const container = document.getElementById(`scroll-container-${index}`)
-        if (container) {
-          container.removeEventListener('scroll', handleScroll)
-        }
-      })
-    }
   }, [photoShoots])
 
   // Recalculate title max widths on resize
@@ -182,7 +149,7 @@ export default function PhotoGallery({ photoShoots }: PhotoGalleryProps) {
       <div
         className={`fixed inset-0 z-50 flex items-center justify-center pointer-events-none transition-opacity duration-500 ${showHint ? 'opacity-100' : 'opacity-0'}`}
       >
-        <div className="bg-black/70 text-white rounded-2xl px-6 py-4 flex flex-col items-center gap-2 backdrop-blur-sm">
+        <div className="bg-white text-black rounded-2xl px-6 py-4 flex flex-col items-center gap-2">
           <div className="flex items-center gap-2 text-sm font-medium">
             <span>↕</span>
             <span>Swipe up &amp; down to browse shoots</span>
@@ -200,12 +167,10 @@ export default function PhotoGallery({ photoShoots }: PhotoGalleryProps) {
         >
           {/* Static Photoshoot Title at bottom */}
           <div
-            className={`absolute bottom-8 left-8 z-10 transition-opacity duration-300 pointer-events-none ${
-              fadedTitles.has(shootIndex) ? 'opacity-0' : 'opacity-100'
-            }`}
+            className="auto-hide invert-blend absolute bottom-8 left-8 z-10 pointer-events-none"
             style={{ maxWidth: titleMaxWidths[shootIndex] ? `${titleMaxWidths[shootIndex] - 32}px` : undefined }}
           >
-            <h2 className="text-3xl font-bold text-white drop-shadow-lg whitespace-normal break-words">
+            <h2 className="text-3xl font-bold whitespace-normal break-words">
               {shoot.name}
             </h2>
           </div>
@@ -251,7 +216,7 @@ export default function PhotoGallery({ photoShoots }: PhotoGalleryProps) {
                       sizes="100vh"
                     />
                     {/* Loading skeleton overlay */}
-                    <div className={`${loadedIds.has(photo.id) ? 'opacity-0' : 'opacity-100'} absolute inset-0 bg-gradient-to-b from-black/10 to-transparent animate-pulse transition-opacity duration-500`} />
+                    <div className={`${loadedIds.has(photo.id) ? 'opacity-0' : 'opacity-100'} absolute inset-0 bg-gradient-to-b from-black/10 to-transparent transition-opacity duration-500`} />
                     {/* Expand icon */}
                     <div className="auto-hide absolute bottom-4 right-4 text-white/70 drop-shadow-lg pointer-events-none">
                       <Maximize2 size={16} />
@@ -263,13 +228,13 @@ export default function PhotoGallery({ photoShoots }: PhotoGalleryProps) {
             {/* Subtle scroll hint: right-edge gradient + chevron, hidden after scroll */}
             <div
               className={`pointer-events-none absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-black/20 to-transparent transition-opacity duration-300 ${
-                canScroll[shootIndex] && !fadedTitles.has(shootIndex) ? 'opacity-100' : 'opacity-0'
+                canScroll[shootIndex] ? 'opacity-100' : 'opacity-0'
               }`}
             />
             <ChevronRight
-              className={`hidden md:block pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-white/70 transition-opacity duration-300 ${
-                canScroll[shootIndex] && !fadedTitles.has(shootIndex) ? 'opacity-100' : 'opacity-0'
-              } animate-pulse`}
+              className={`auto-hide invert-blend hidden md:block pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 transition-opacity duration-300 ${
+                canScroll[shootIndex] ? 'opacity-100' : 'opacity-0'
+              }`}
               size={20}
             />
           </div>

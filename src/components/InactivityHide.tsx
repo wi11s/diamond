@@ -8,6 +8,10 @@ export default function InactivityHide() {
   const timerRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
+    document.documentElement.classList.remove('ui-loading')
+  }, [])
+
+  useEffect(() => {
     if (pathname === '/scroll') return
     const root = document.documentElement
 
@@ -34,7 +38,7 @@ export default function InactivityHide() {
     const resetTimer = () => {
       setActive()
       if (timerRef.current) clearTimeout(timerRef.current)
-      timerRef.current = setTimeout(setIdle, 2000)
+      timerRef.current = setTimeout(setIdle, 5000)
     }
 
     // Initialize (desktop only)
