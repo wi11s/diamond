@@ -20,84 +20,61 @@ export default function Navigation() {
   const pathname = usePathname()
   const router = useRouter()
 
-  // Clear clicked state when navigation completes
   useEffect(() => {
     setClickedHref(null)
   }, [pathname])
 
+  if (pathname === '/' || pathname === '/scroll') return null
+
   const handleNavClick = (e: React.MouseEvent, href: string) => {
     e.preventDefault()
     setClickedHref(href)
-    startTransition(() => {
-      router.push(href)
-    })
+    startTransition(() => router.push(href))
   }
-
-  // Pages with white/light backgrounds need dark nav text
-  const isLightPage = pathname === '/dates' || pathname === '/bio' || pathname === '/links'
-  // Dates has a busy flier background so the nav needs a pill
-  const needsPillBg = pathname === '/dates'
-
-  // On landing page, the page itself is navigation; scroll page has no UI
-  if (pathname === '/' || pathname === '/scroll') {
-    return null
-  }
-
-  const textActive = isLightPage ? 'text-black' : 'text-white'
-  const textInactive = isLightPage ? 'text-black/70 hover:text-black' : 'text-white/70 hover:text-white'
 
   return (
     <>
-      {/* Desktop Navigation */}
-      <nav className={`auto-hide fixed top-0 left-0 right-0 z-40 p-6`}>
-        <div className="max-w-7xl mx-auto flex justify-end items-center">
-          {/* Desktop Menu */}
-          <div className={`hidden md:flex items-center gap-8 ${needsPillBg ? 'bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full -mr-4 -mt-2' : ''}`}>
-            {navItems.map((item) => {
-              const isActive = pathname === item.href
-              const isLoading = isPending && clickedHref === item.href
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  prefetch
-                  onClick={(e) => handleNavClick(e, item.href)}
-                  className={`text-sm font-medium transition-all duration-150 ${
-                    isLoading ? 'opacity-50' : ''
-                  } ${isActive ? textActive : textInactive}`}
-                >
-                  {item.label}
-                </Link>
-              )
-            })}
+      <nav className="auto-hide fixed top-0 left-0 right-0 z-40 p-6">
+        <div className="max-w-7xl mx-auto flex justify-center items-center">
+
+          {/* Desktop */}
+          <div className="hidden md:flex items-center gap-8 px-4 py-2 -mr-4 -mt-2">
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                prefetch
+                onClick={(e) => handleNavClick(e, item.href)}
+                className={`text-sm font-medium transition-all duration-150 ${
+                  isPending && clickedHref === item.href ? 'opacity-50' : ''
+                } ${pathname === item.href ? 'text-black' : 'text-black/70 hover:text-black'}`}
+              >
+                {item.label}
+              </Link>
+            ))}
             <a
               href="mailto:taylordiamond10@gmail.com"
-              className={`text-xs font-medium tracking-widest uppercase border px-4 py-1.5 rounded-full transition-all duration-150 ${
-                isLightPage
-                  ? 'border-black/30 hover:border-black/70 text-black/60 hover:text-black'
-                  : 'border-white/30 hover:border-white/70 text-white/60 hover:text-white'
-              }`}
+              className="text-xs font-medium tracking-widest uppercase border border-black/30 hover:border-black/70 text-black/60 hover:text-black px-4 py-1.5 rounded-full transition-all duration-150"
             >
               Work with me
             </a>
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile toggle */}
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className={`md:hidden p-2 rounded-full ${isLightPage ? 'text-black' : 'text-white'} ${needsPillBg ? 'bg-white/90 backdrop-blur-sm' : ''}`}
+            className="md:hidden p-2 rounded-full text-black"
           >
             {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
       </nav>
 
-      {/* Mobile Navigation */}
+      {/* Mobile menu */}
       {isOpen && (
         <div className="fixed inset-0 z-40 md:hidden">
           <div className="absolute inset-0 bg-black/95" />
           <div className="relative flex flex-col items-center justify-center h-full space-y-8">
-            {/* Close button (top-right) */}
             <button
               aria-label="Close menu"
               onClick={() => setIsOpen(false)}
@@ -105,30 +82,19 @@ export default function Navigation() {
             >
               <X size={24} />
             </button>
-            {navItems.map((item) => {
-              const isActive = pathname === item.href
-              const isLoading = isPending && clickedHref === item.href
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={(e) => {
-                    setIsOpen(false)
-                    handleNavClick(e, item.href)
-                  }}
-                  prefetch
-                  className={`text-xl font-medium transition-all duration-150 ${
-                    isLoading ? 'opacity-50' : ''
-                  } ${
-                    isActive
-                      ? 'text-white'
-                      : 'text-white/70 hover:text-white'
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              )
-            })}
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                prefetch
+                onClick={(e) => { setIsOpen(false); handleNavClick(e, item.href) }}
+                className={`text-xl font-medium transition-all duration-150 ${
+                  isPending && clickedHref === item.href ? 'opacity-50' : ''
+                } ${pathname === item.href ? 'text-white' : 'text-white/70 hover:text-white'}`}
+              >
+                {item.label}
+              </Link>
+            ))}
             <a
               href="mailto:taylordiamond10@gmail.com"
               onClick={() => setIsOpen(false)}

@@ -16,10 +16,10 @@ export default function UsageNotice() {
 
   return (
     <div
-      className="auto-hide fixed inset-x-0 bottom-4 z-30 flex justify-center pointer-events-none transition-opacity duration-300"
+      className="auto-hide fixed inset-x-0 bottom-4 z-30 flex justify-center pointer-events-none"
       aria-hidden
     >
-      <div className="px-3 py-1 rounded-full bg-white/80 border border-gray-200 text-[11px] leading-none text-gray-600 shadow-sm">
+      <div className="text-[11px] leading-none text-black/60">
         All photos © Taylor Diamond
       </div>
     </div>

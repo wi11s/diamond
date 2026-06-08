@@ -1,19 +1,38 @@
 export const metadata = {
-  title: 'Links — Taylor Diamond',
+  title: 'Links - Taylor Diamond',
   description: 'Selected videos and projects',
 }
 
-const links: { title: string; href: string }[] = [
-  { title: 'Steppin’ out @ pianos 2 (DJ Set)', href: 'https://youtu.be/XZSUoSw4gfo' },
-  { title: 'Cash$tarr - Darling (Music Video)', href: 'https://www.youtube.com/watch?v=zA9VsQVUKQM' },
-  { title: 'Ka$hkenni - Cupid (Music Video)', href: 'https://youtu.be/MbiPFdoaEKo' },
-  { title: 'Steppin’ out @ pianos 1 (DJ Set)', href: 'https://youtu.be/UfW-7UnFlJI' },
-  { title: 'Elliot Michaels - Mitsubishi (Music Video)', href: 'https://youtu.be/GnSlW4nXI5A' },
-  { title: 'Rockaway short film (Short Film)', href: 'https://youtu.be/q---SR5yXt4' },
-  { title: 'Tape 1 (Analog Visualizer)', href: 'https://youtu.be/XSrpJV9WugU' },
-]
+export const revalidate = 3600
 
-export default function LinksPage() {
+const GOOGLE_SHEET_CSV_URL =
+  'https://docs.google.com/spreadsheets/d/1yv6dFsyyVzyuzNvRScSOFySOTRyBC3ZUSv5j6lcarzw/export?format=csv'
+
+async function getLinks(): Promise<{ title: string; href: string }[]> {
+  try {
+    const res = await fetch(GOOGLE_SHEET_CSV_URL, { next: { revalidate: 3600 } })
+    const text = await res.text()
+    return text
+      .replace(/\r\n/g, '\n')
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((line) => {
+        const comma = line.indexOf(',')
+        return {
+          title: line.slice(0, comma).trim(),
+          href: line.slice(comma + 1).trim(),
+        }
+      })
+      .filter((link) => link.title && link.href)
+  } catch {
+    return []
+  }
+}
+
+export default async function LinksPage() {
+  const links = await getLinks()
+
   return (
     <div className="min-h-screen text-black bg-white px-6 pt-24 pb-20 relative">
       <div className="max-w-2xl mx-auto relative z-10">
@@ -36,4 +55,3 @@ export default function LinksPage() {
     </div>
   )
 }
-
