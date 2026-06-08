@@ -40,9 +40,12 @@ export default function Navigation() {
   return (
     <>
       {/* Desktop nav */}
-      <nav className={`ui-chrome auto-hide fixed top-0 left-0 right-0 z-40 px-10 py-5 flex items-center ${plainStyle ? 'bg-white border-b border-black/10 text-black' : 'invert-blend invert-pill'}`}>
-        {/* Nav links */}
-        <div className="hidden md:flex items-center gap-10 flex-1">
+      <nav className={`ui-chrome auto-hide fixed top-0 left-0 right-0 z-40 p-6 flex items-center ${plainStyle ? 'text-black' : 'invert-blend'}`}>
+        {/* Left spacer */}
+        <div className="flex-1 hidden md:block" />
+
+        {/* Centered pill */}
+        <div className={`hidden md:flex items-center gap-10 px-10 py-4 rounded-full ${plainStyle ? '' : 'invert-pill'}`}>
           {navItems.map((item) => (
             <Link
               key={item.href}
@@ -63,10 +66,10 @@ export default function Navigation() {
         </div>
 
         {/* Work with me — right */}
-        <div className="hidden md:flex justify-end">
+        <div className="flex-1 hidden md:flex justify-end">
           <a
             href="mailto:taylordiamond10@gmail.com"
-            className={`text-sm font-bold tracking-widest uppercase px-5 py-2.5 rounded-full ${plainStyle ? 'bg-black text-white' : 'bg-black text-white'}`}
+            className="bg-black text-white text-sm font-bold tracking-widest uppercase px-5 py-2.5 rounded-full"
           >
             Work with me
           </a>
