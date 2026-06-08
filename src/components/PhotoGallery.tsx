@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import Image from 'next/image'
 import { ChevronRight, Maximize2 } from 'lucide-react'
+import { useGallery } from '@/context/GalleryContext'
 
 interface Photo {
   id: string
@@ -23,6 +24,7 @@ interface PhotoGalleryProps {
 }
 
 export default function PhotoGallery({ photoShoots }: PhotoGalleryProps) {
+  const { setPhotosLoaded } = useGallery()
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null)
   const [loadedIds, setLoadedIds] = useState<Set<string>>(new Set())
   const [isExpandedLoaded, setIsExpandedLoaded] = useState(false)
@@ -30,6 +32,11 @@ export default function PhotoGallery({ photoShoots }: PhotoGalleryProps) {
   const [titleMaxWidths, setTitleMaxWidths] = useState<Record<number, number>>({})
   const [canScroll, setCanScroll] = useState<Record<number, boolean>>({})
   const [showHint, setShowHint] = useState(true)
+
+  useEffect(() => {
+    setPhotosLoaded(false)
+    return () => setPhotosLoaded(false)
+  }, [setPhotosLoaded])
 
   useEffect(() => {
     const t = setTimeout(() => setShowHint(false), 2000)
@@ -211,6 +218,7 @@ export default function PhotoGallery({ photoShoots }: PhotoGalleryProps) {
                       draggable={false}
                       onLoadingComplete={() => {
                         setLoadedIds((prev) => { const next = new Set(prev); next.add(photo.id); return next })
+                        if (idx === 0 && shootIndex === 0) setPhotosLoaded(true)
                         if (idx === 0) measureFirstImage(shootIndex)
                       }}
                       sizes="100vh"

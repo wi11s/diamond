@@ -4,6 +4,7 @@ import { useState, useTransition, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
+import { useGallery } from '@/context/GalleryContext'
 
 const navItems = [
   { href: '/portraits', label: 'Portraits' },
@@ -19,6 +20,10 @@ export default function Navigation() {
   const [clickedHref, setClickedHref] = useState<string | null>(null)
   const pathname = usePathname()
   const router = useRouter()
+  const { photosLoaded } = useGallery()
+
+  const isGalleryPage = pathname?.startsWith('/portraits') || pathname?.startsWith('/landscape')
+  const plainStyle = pathname === '/links' || pathname === '/bio' || (isGalleryPage && !photosLoaded)
 
   useEffect(() => {
     setClickedHref(null)
@@ -35,9 +40,13 @@ export default function Navigation() {
   return (
     <>
       {/* Desktop nav */}
-      <nav className="ui-chrome auto-hide invert-blend fixed top-0 left-0 right-0 z-40 p-6">
-        <div className="max-w-7xl mx-auto flex justify-center items-center">
-          <div className="invert-pill hidden md:flex items-center gap-12 px-10 py-4 rounded-full">
+      <nav className={`ui-chrome auto-hide fixed top-0 left-0 right-0 z-40 p-6 ${plainStyle ? '' : 'invert-blend'}`}>
+        <div className="max-w-7xl mx-auto flex items-center">
+          {/* Left spacer */}
+          <div className="flex-1 hidden md:block" />
+
+          {/* Centered pill */}
+          <div className={`hidden md:flex items-center gap-12 px-10 py-4 rounded-full ${plainStyle ? 'text-black' : 'invert-pill'}`}>
             {navItems.map((item) => (
               <Link
                 key={item.href}
@@ -53,6 +62,16 @@ export default function Navigation() {
             ))}
           </div>
 
+          {/* Work with me — right */}
+          <div className="flex-1 hidden md:flex justify-end">
+            <a
+              href="mailto:taylordiamond10@gmail.com"
+              className={`text-sm font-bold tracking-widest uppercase px-5 py-2.5 rounded-full ${plainStyle ? 'bg-black text-white' : 'bg-black'}`}
+            >
+              Work with me
+            </a>
+          </div>
+
           {/* Mobile toggle */}
           <button
             onClick={() => setIsOpen(!isOpen)}
@@ -62,14 +81,6 @@ export default function Navigation() {
           </button>
         </div>
       </nav>
-
-      {/* Work with me — top right */}
-      <a
-        href="mailto:taylordiamond10@gmail.com"
-        className="ui-chrome auto-hide invert-blend fixed top-6 right-6 z-40 hidden md:block bg-black text-sm font-bold tracking-widest uppercase px-5 py-2.5 rounded-full"
-      >
-        Work with me
-      </a>
 
       {/* Mobile menu */}
       {isOpen && (

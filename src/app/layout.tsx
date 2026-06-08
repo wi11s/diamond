@@ -5,6 +5,7 @@ import Navigation from '@/components/Navigation'
 import SocialDock from '@/components/SocialDock'
 import UsageNotice from '@/components/UsageNotice'
 import InactivityHide from '@/components/InactivityHide'
+import { GalleryProvider } from '@/context/GalleryContext'
 import { Analytics } from "@vercel/analytics/next"
 
 const inter = Inter({ subsets: ['latin'] })
@@ -34,13 +35,15 @@ export default function RootLayout({
       <Analytics />
       <body className={inter.className}>
         <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('ui-loading')" }} />
-        <InactivityHide />
-        <Navigation />
-        <main className="min-h-screen">
-          {children}
-        </main>
-        <UsageNotice />
-        <SocialDock />
+        <GalleryProvider>
+          <InactivityHide />
+          <Navigation />
+          <main className="min-h-screen">
+            {children}
+          </main>
+          <UsageNotice />
+          <SocialDock />
+        </GalleryProvider>
       </body>
     </html>
   )
