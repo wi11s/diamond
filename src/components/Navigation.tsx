@@ -34,7 +34,7 @@ export default function Navigation() {
 
   return (
     <>
-      <nav className="auto-hide fixed top-0 left-0 right-0 z-40 p-6">
+      <nav className="invert-blend fixed top-0 left-0 right-0 z-40 p-6">
         <div className="max-w-7xl mx-auto flex justify-center items-center">
 
           {/* Desktop */}
@@ -45,16 +45,16 @@ export default function Navigation() {
                 href={item.href}
                 prefetch
                 onClick={(e) => handleNavClick(e, item.href)}
-                className={`text-sm font-medium transition-all duration-150 ${
+                className={`text-base font-medium transition-all duration-150 ${
                   isPending && clickedHref === item.href ? 'opacity-50' : ''
-                } ${pathname === item.href ? 'text-black' : 'text-black/70 hover:text-black'}`}
+                } text-white`}
               >
                 {item.label}
               </Link>
             ))}
             <a
               href="mailto:taylordiamond10@gmail.com"
-              className="text-xs font-medium tracking-widest uppercase border border-black/30 hover:border-black/70 text-black/60 hover:text-black px-4 py-1.5 rounded-full transition-all duration-150"
+              className="text-sm font-medium tracking-widest uppercase border border-white text-white px-4 py-1.5 rounded-full transition-all duration-150"
             >
               Work with me
             </a>
@@ -63,7 +63,7 @@ export default function Navigation() {
           {/* Mobile toggle */}
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="md:hidden p-2 rounded-full text-black"
+            className="md:hidden p-2 rounded-full"
           >
             {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>

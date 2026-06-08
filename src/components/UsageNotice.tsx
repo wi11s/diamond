@@ -16,10 +16,10 @@ export default function UsageNotice() {
 
   return (
     <div
-      className="auto-hide fixed inset-x-0 bottom-4 z-30 flex justify-center pointer-events-none"
+      className="invert-blend fixed inset-x-0 bottom-4 z-30 flex justify-center pointer-events-none"
       aria-hidden
     >
-      <div className="text-[11px] leading-none text-black/60">
+      <div className="text-sm leading-none">
         All photos © Taylor Diamond
       </div>
     </div>
