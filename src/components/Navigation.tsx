@@ -40,50 +40,45 @@ export default function Navigation() {
   return (
     <>
       {/* Desktop nav */}
-      <nav className={`ui-chrome auto-hide fixed top-0 left-0 right-0 z-40 p-6 ${plainStyle ? '' : 'invert-blend'}`}>
-        <div className="max-w-7xl mx-auto flex items-center">
-          {/* Left spacer */}
-          <div className="flex-1 hidden md:block" />
-
-          {/* Centered pill */}
-          <div className={`hidden md:flex items-center gap-12 px-10 py-4 rounded-full ${plainStyle ? 'text-black' : 'invert-pill'}`}>
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                prefetch
-                onClick={(e) => handleNavClick(e, item.href)}
-                className={`text-3xl font-bold transition-opacity duration-150 ${
-                  isPending && clickedHref === item.href
-                    ? 'opacity-30'
-                    : pathname === item.href
-                    ? 'underline underline-offset-4'
-                    : 'opacity-30'
-                }`}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </div>
-
-          {/* Work with me — right */}
-          <div className="flex-1 hidden md:flex justify-end">
-            <a
-              href="mailto:taylordiamond10@gmail.com"
-              className={`text-sm font-bold tracking-widest uppercase px-5 py-2.5 rounded-full ${plainStyle ? 'bg-black text-white' : 'bg-black'}`}
+      <nav className={`ui-chrome auto-hide fixed top-0 left-0 right-0 z-40 px-10 py-5 flex items-center ${plainStyle ? 'bg-white border-b border-black/10 text-black' : 'invert-blend invert-pill'}`}>
+        {/* Nav links */}
+        <div className="hidden md:flex items-center gap-10 flex-1">
+          {navItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              prefetch
+              onClick={(e) => handleNavClick(e, item.href)}
+              className={`text-xl font-bold transition-opacity duration-150 ${
+                isPending && clickedHref === item.href
+                  ? 'opacity-40'
+                  : pathname === item.href
+                  ? 'underline underline-offset-4'
+                  : 'opacity-55'
+              }`}
             >
-              Work with me
-            </a>
-          </div>
-
-          {/* Mobile toggle */}
-          <button
-            onClick={() => setIsOpen(!isOpen)}
-            className="md:hidden p-2 rounded-full"
-          >
-            {isOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+              {item.label}
+            </Link>
+          ))}
         </div>
+
+        {/* Work with me — right */}
+        <div className="hidden md:flex justify-end">
+          <a
+            href="mailto:taylordiamond10@gmail.com"
+            className={`text-sm font-bold tracking-widest uppercase px-5 py-2.5 rounded-full ${plainStyle ? 'bg-black text-white' : 'bg-black text-white'}`}
+          >
+            Work with me
+          </a>
+        </div>
+
+        {/* Mobile toggle */}
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="md:hidden p-2 rounded-full"
+        >
+          {isOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
       </nav>
 
       {/* Mobile menu */}
