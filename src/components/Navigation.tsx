@@ -40,12 +40,12 @@ export default function Navigation() {
   return (
     <>
       {/* Desktop nav */}
-      <nav className="ui-chrome auto-hide fixed top-0 left-0 right-0 z-40 p-6 flex items-center">
+      <nav className="fixed top-0 left-0 right-0 z-40 p-6 flex items-center">
         {/* Left spacer */}
         <div className="flex-1 hidden md:block" />
 
         {/* Centered pill */}
-        <div className={`hidden md:flex items-center gap-10 px-10 py-4 rounded-full ${plainStyle ? '' : 'invert-pill'}`}>
+        <div className={`auto-hide hidden md:flex items-center gap-10 px-10 py-4 rounded-full ${plainStyle ? '' : 'invert-pill'}`}>
           {navItems.map((item) => (
             <Link
               key={item.href}
@@ -69,7 +69,7 @@ export default function Navigation() {
         <div className="flex-1 hidden md:flex justify-end">
           <a
             href="mailto:taylordiamond10@gmail.com"
-            className="invert-pill text-sm font-bold tracking-widest uppercase px-5 py-2.5 rounded-full"
+            className="auto-hide invert-pill text-sm font-bold tracking-widest uppercase px-5 py-2.5 rounded-full"
           >
             Work with me
           </a>
@@ -87,8 +87,12 @@ export default function Navigation() {
       {/* Mobile menu */}
       {isOpen && (
         <div className="fixed inset-0 z-40 md:hidden">
-          <div className="absolute inset-0 bg-black/95" />
-          <div className="relative flex flex-col items-center justify-center h-full space-y-8">
+          <img
+            src="https://res.cloudinary.com/dpaytjafy/image/upload/v1755557549/IMG_7764_dnee02.jpg"
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+          <div className="relative flex flex-col items-center justify-center h-full">
             <button
               aria-label="Close menu"
               onClick={() => setIsOpen(false)}
@@ -96,26 +100,28 @@ export default function Navigation() {
             >
               <X size={24} />
             </button>
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                prefetch
-                onClick={(e) => { setIsOpen(false); handleNavClick(e, item.href) }}
-                className={`text-xl font-medium transition-all duration-150 ${
-                  isPending && clickedHref === item.href ? 'opacity-50' : ''
-                } ${pathname === item.href ? 'text-white' : 'text-white/70 hover:text-white'}`}
+            <div className="invert-pill flex flex-col items-center gap-8 px-12 py-10 rounded-3xl">
+              {navItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  prefetch
+                  onClick={(e) => { setIsOpen(false); handleNavClick(e, item.href) }}
+                  className={`text-base font-medium transition-opacity duration-150 ${
+                    isPending && clickedHref === item.href ? 'opacity-40' : pathname === item.href ? 'underline underline-offset-4' : 'opacity-55'
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              ))}
+              <a
+                href="mailto:taylordiamond10@gmail.com"
+                onClick={() => setIsOpen(false)}
+                className="text-sm font-medium tracking-widest uppercase border border-white/50 hover:border-white text-white/80 hover:text-white px-5 py-2 rounded-full transition-colors duration-150"
               >
-                {item.label}
-              </Link>
-            ))}
-            <a
-              href="mailto:taylordiamond10@gmail.com"
-              onClick={() => setIsOpen(false)}
-              className="text-xs font-bold tracking-widest uppercase bg-white text-black px-6 py-2.5 rounded-full mt-4"
-            >
-              Work with me
-            </a>
+                Work with me
+              </a>
+            </div>
           </div>
         </div>
       )}

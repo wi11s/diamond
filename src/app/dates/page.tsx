@@ -18,11 +18,8 @@ export default async function Dates() {
 
       {/* Centered white card with dates */}
       <div className="fixed inset-0 flex items-center justify-center z-30 pointer-events-none">
-        <div className="bg-white border border-black/10 shadow-md rounded-md px-5 py-4 w-[min(92vw,720px)] pointer-events-auto">
+        <div className="invert-pill rounded-3xl px-8 py-8 w-[min(92vw,720px)] pointer-events-auto">
           <div>
-            <div className="mb-3 text-center">
-              <h1 className="text-xl font-semibold">Dates</h1>
-            </div>
             <section>
               <ul className="space-y-2 text-center">
                 {upcomingEvents.map((event) => {

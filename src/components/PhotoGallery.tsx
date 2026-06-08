@@ -31,6 +31,7 @@ export default function PhotoGallery({ photoShoots }: PhotoGalleryProps) {
   const firstImageRefs = useRef<Record<number, HTMLDivElement | null>>({})
   const [titleMaxWidths, setTitleMaxWidths] = useState<Record<number, number>>({})
   const [canScroll, setCanScroll] = useState<Record<number, boolean>>({})
+  const [fadedTitles, setFadedTitles] = useState<Set<number>>(new Set())
   const [showHint, setShowHint] = useState(true)
 
   useEffect(() => {
@@ -65,15 +66,36 @@ export default function PhotoGallery({ photoShoots }: PhotoGalleryProps) {
   }
 
   useEffect(() => {
+    const handleScroll = (event: Event) => {
+      const target = event.target as HTMLElement
+      const shootIndex = parseInt(target.id.replace('scroll-container-', ''))
+      if (isNaN(shootIndex)) return
+      const beyond = target.scrollLeft > 10
+      setFadedTitles(prev => {
+        const has = prev.has(shootIndex)
+        if (beyond && !has) { const next = new Set(prev); next.add(shootIndex); return next }
+        if (!beyond && has) { const next = new Set(prev); next.delete(shootIndex); return next }
+        return prev
+      })
+    }
+
     photoShoots.forEach((_, index) => {
       const container = document.getElementById(`scroll-container-${index}`)
       if (container) {
+        container.addEventListener('scroll', handleScroll)
         setCanScroll(prev => ({
           ...prev,
           [index]: container.scrollWidth > container.clientWidth + 1,
         }))
       }
     })
+
+    return () => {
+      photoShoots.forEach((_, index) => {
+        const container = document.getElementById(`scroll-container-${index}`)
+        if (container) container.removeEventListener('scroll', handleScroll)
+      })
+    }
   }, [photoShoots])
 
   // Recalculate title max widths on resize
@@ -156,12 +178,12 @@ export default function PhotoGallery({ photoShoots }: PhotoGalleryProps) {
       <div
         className={`fixed inset-0 z-50 flex items-center justify-center pointer-events-none transition-opacity duration-500 ${showHint ? 'opacity-100' : 'opacity-0'}`}
       >
-        <div className="bg-white text-black rounded-2xl px-6 py-4 flex flex-col items-center gap-2">
-          <div className="flex items-center gap-2 text-sm font-medium">
+        <div className="bg-white rounded-2xl px-6 py-4 flex flex-col items-center gap-2" style={{ isolation: 'isolate' }}>
+          <div className="flex items-center gap-2 text-sm font-bold text-black" style={{ mixBlendMode: 'destination-out' }}>
             <span>↕</span>
             <span>Swipe up &amp; down to browse shoots</span>
           </div>
-          <div className="flex items-center gap-2 text-sm font-medium">
+          <div className="flex items-center gap-2 text-sm font-bold text-black" style={{ mixBlendMode: 'destination-out' }}>
             <span>↔</span>
             <span>Swipe side to side for photos</span>
           </div>
@@ -174,7 +196,7 @@ export default function PhotoGallery({ photoShoots }: PhotoGalleryProps) {
         >
           {/* Static Photoshoot Title at bottom */}
           <div
-            className="auto-hide invert-blend absolute bottom-8 left-8 z-10 pointer-events-none"
+            className={`invert-blend absolute bottom-8 left-8 z-10 pointer-events-none transition-opacity duration-300 ${fadedTitles.has(shootIndex) ? 'opacity-0' : 'opacity-100'}`}
             style={{ maxWidth: titleMaxWidths[shootIndex] ? `${titleMaxWidths[shootIndex] - 32}px` : undefined }}
           >
             <h2 className="text-3xl font-bold whitespace-normal break-words">

@@ -1,3 +1,5 @@
+import Image from 'next/image'
+
 export const metadata = {
   title: 'Links - Taylor Diamond',
   description: 'Selected videos and projects',
@@ -34,16 +36,24 @@ export default async function LinksPage() {
   const links = await getLinks()
 
   return (
-    <div className="min-h-screen text-black bg-white px-6 pt-40 pb-20 relative">
-      <div className="max-w-2xl mx-auto relative z-10">
-        <ul className="space-y-3 text-sm">
+    <div className="min-h-screen flex items-center justify-center relative">
+      <Image
+        src="https://res.cloudinary.com/dpaytjafy/image/upload/v1755557549/IMG_7764_dnee02.jpg"
+        alt=""
+        fill
+        className="object-cover"
+        priority
+        unoptimized
+      />
+      <div className="invert-pill relative z-10 px-12 py-10 rounded-3xl">
+        <ul className="space-y-3 text-base">
           {links.map((item) => (
             <li key={item.href}>
               <a
                 href={item.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="underline hover:opacity-80"
+                className="hover:opacity-80 underline"
               >
                 {item.title}
               </a>
