@@ -175,15 +175,16 @@ export default function PhotoGallery({ photoShoots }: PhotoGalleryProps) {
   return (
     <div className="min-h-screen bg-white text-black">
       {/* Swipe hint popup */}
-      <div
-        className={`fixed inset-0 z-50 flex items-center justify-center pointer-events-none transition-opacity duration-500 ${showHint ? 'opacity-100' : 'opacity-0'}`}
-      >
-        <div className="bg-white rounded-2xl px-6 py-4 flex flex-col items-center gap-2" style={{ isolation: 'isolate' }}>
-          <div className="flex items-center gap-2 text-sm font-bold text-black" style={{ mixBlendMode: 'destination-out' }}>
+      <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
+        <div
+          className={`invert-pill rounded-2xl px-6 py-4 flex flex-col items-center gap-2 transition-opacity duration-500 ${showHint ? 'opacity-100' : 'opacity-0'}`}
+          style={{ backdropFilter: 'invert(1) blur(16px)', WebkitBackdropFilter: 'invert(1) blur(16px)' }}
+        >
+          <div className="flex items-center gap-2 text-sm font-bold">
             <span>↕</span>
             <span>Swipe up &amp; down to browse shoots</span>
           </div>
-          <div className="flex items-center gap-2 text-sm font-bold text-black" style={{ mixBlendMode: 'destination-out' }}>
+          <div className="flex items-center gap-2 text-sm font-bold">
             <span>↔</span>
             <span>Swipe side to side for photos</span>
           </div>
