@@ -54,7 +54,11 @@ export default function Navigation() {
                 prefetch
                 onClick={(e) => handleNavClick(e, item.href)}
                 className={`text-3xl font-bold transition-opacity duration-150 ${
-                  isPending && clickedHref === item.href ? 'opacity-50' : ''
+                  isPending && clickedHref === item.href
+                    ? 'opacity-30'
+                    : pathname === item.href
+                    ? 'underline underline-offset-4'
+                    : 'opacity-30'
                 }`}
               >
                 {item.label}

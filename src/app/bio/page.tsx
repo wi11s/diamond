@@ -39,7 +39,6 @@ export default async function BioPage() {
   return (
     <div className="min-h-screen text-black bg-white px-6 pt-24 pb-20 relative">
       <div className="max-w-2xl mx-auto relative z-10">
-        <h1 className="text-2xl font-semibold mb-6">Bio</h1>
         <div className="space-y-5 text-sm leading-7 text-black/90">
           {paragraphs.map((p, i) => (
             <p key={i}>{renderWithItalics(p)}</p>

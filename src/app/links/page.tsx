@@ -36,7 +36,6 @@ export default async function LinksPage() {
   return (
     <div className="min-h-screen text-black bg-white px-6 pt-24 pb-20 relative">
       <div className="max-w-2xl mx-auto relative z-10">
-        <h1 className="text-2xl font-semibold mb-6">Links</h1>
         <ul className="space-y-3 text-sm">
           {links.map((item) => (
             <li key={item.href}>
