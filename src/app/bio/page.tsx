@@ -37,7 +37,7 @@ export default async function BioPage() {
   const [headshot, paragraphs] = await Promise.all([getDjHeadshot(), getBioParagraphs()])
 
   return (
-    <div className="min-h-screen text-black bg-white px-6 pt-24 pb-20 relative">
+    <div className="min-h-screen text-black bg-white px-6 pt-40 pb-20 relative">
       <div className="max-w-2xl mx-auto relative z-10">
         <div className="space-y-5 text-sm leading-7 text-black/90">
           {paragraphs.map((p, i) => (

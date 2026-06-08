@@ -34,7 +34,7 @@ export default async function LinksPage() {
   const links = await getLinks()
 
   return (
-    <div className="min-h-screen text-black bg-white px-6 pt-24 pb-20 relative">
+    <div className="min-h-screen text-black bg-white px-6 pt-40 pb-20 relative">
       <div className="max-w-2xl mx-auto relative z-10">
         <ul className="space-y-3 text-sm">
           {links.map((item) => (
