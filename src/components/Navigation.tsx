@@ -24,7 +24,8 @@ export default function Navigation() {
 
   const isGalleryPage = pathname?.startsWith('/portraits') || pathname?.startsWith('/landscape')
   const plainStyle = pathname === '/links' || pathname === '/bio' || (isGalleryPage && !photosLoaded)
-  const whiteText = pathname === '/bio'
+  // Pill bg suppressed only on /links and while gallery loads; bio gets invert-pill same as dates
+  const noPillBg = pathname === '/links' || (isGalleryPage && !photosLoaded)
 
   useEffect(() => {
     setClickedHref(null)
@@ -40,6 +41,23 @@ export default function Navigation() {
 
   return (
     <>
+      {/* Pill-shaped blur backdrop for bio — must be its own fixed element, not a child of the fixed nav */}
+      {pathname === '/bio' && (
+        <div
+          className="hidden md:block fixed pointer-events-none rounded-full auto-hide ui-chrome"
+          style={{
+            top: '1.5rem',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '470px',
+            height: '41px',
+            zIndex: 39,
+            backdropFilter: 'blur(20px) brightness(0.9)',
+            WebkitBackdropFilter: 'blur(20px) brightness(0.9)',
+          }}
+        />
+      )}
+
       {/* Desktop nav */}
       <nav className="fixed top-0 left-0 right-0 z-40 p-6 flex items-center">
         {/* Left spacer */}
@@ -47,8 +65,12 @@ export default function Navigation() {
 
         {/* Centered pill */}
         <div
-          className={`auto-hide hidden md:flex items-center gap-6 px-7 py-2.5 rounded-full ${plainStyle ? (whiteText ? 'text-white' : '') : 'invert-pill'}`}
-          style={pathname === '/dates' ? { backdropFilter: 'invert(1) blur(16px)', WebkitBackdropFilter: 'invert(1) blur(16px)' } : undefined}
+          className={`ui-chrome auto-hide hidden md:flex items-center gap-6 px-7 py-2.5 rounded-full ${noPillBg ? '' : 'invert-pill'}`}
+          style={
+            pathname === '/dates'
+              ? { backdropFilter: 'invert(1) blur(16px)', WebkitBackdropFilter: 'invert(1) blur(16px)' }
+              : undefined
+          }
         >
           {navItems.map((item) => (
             <Link
@@ -73,8 +95,12 @@ export default function Navigation() {
         <div className="flex-1 hidden md:flex justify-end">
           <a
             href="mailto:taylordiamond10@gmail.com"
-            className={`auto-hide text-xs font-bold tracking-widest uppercase px-4 py-1.5 rounded-full ${plainStyle ? 'invert-blend' : 'invert-pill'}`}
-            style={pathname === '/dates' ? { backdropFilter: 'invert(1) blur(16px)', WebkitBackdropFilter: 'invert(1) blur(16px)' } : undefined}
+            className={`ui-chrome auto-hide text-xs font-bold tracking-widest uppercase px-4 py-1.5 rounded-full ${plainStyle ? 'invert-blend' : 'invert-pill'}`}
+            style={
+              pathname === '/dates'
+                ? { backdropFilter: 'invert(1) blur(16px)', WebkitBackdropFilter: 'invert(1) blur(16px)' }
+                : undefined
+            }
           >
             Work with me
           </a>

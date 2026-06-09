@@ -2,20 +2,24 @@
 
 import { useEffect, useRef } from 'react'
 import { usePathname } from 'next/navigation'
+import { useGallery } from '@/context/GalleryContext'
 
 export default function InactivityHide() {
   const pathname = usePathname()
   const timerRef = useRef<NodeJS.Timeout | null>(null)
+  const { photosLoaded } = useGallery()
+
+  const isGalleryPage = pathname?.startsWith('/portraits') || pathname?.startsWith('/landscape')
 
   useEffect(() => {
+    if (isGalleryPage && !photosLoaded) return
     document.documentElement.classList.remove('ui-loading')
-  }, [])
+  }, [isGalleryPage, photosLoaded])
 
   useEffect(() => {
     if (pathname === '/scroll') return
     const root = document.documentElement
 
-    // On mobile/touch devices, keep UI always visible
     const isMobile =
       (typeof window !== 'undefined' && (
         window.matchMedia('(max-width: 767px)').matches ||
@@ -41,10 +45,8 @@ export default function InactivityHide() {
       timerRef.current = setTimeout(setIdle, 5000)
     }
 
-    // Initialize (desktop only)
     resetTimer()
 
-    // Desktop interactions for idle tracking
     window.addEventListener('mousemove', resetTimer, { passive: true })
     window.addEventListener('mousedown', resetTimer, { passive: true })
     window.addEventListener('keydown', resetTimer)

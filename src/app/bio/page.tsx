@@ -37,15 +37,14 @@ export default async function BioPage() {
   const [headshot, paragraphs] = await Promise.all([getDjHeadshot(), getBioParagraphs()])
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative py-32">
-      <Image
-        src="https://res.cloudinary.com/dpaytjafy/image/upload/v1755557536/IMG_7732_cnnrk4.jpg"
-        alt=""
-        fill
-        className="object-cover"
-        priority
-        unoptimized
-      />
+    <div
+      className="min-h-screen flex items-center justify-center py-32"
+      style={{
+        backgroundImage: 'url(https://res.cloudinary.com/dpaytjafy/image/upload/v1755557536/IMG_7732_cnnrk4.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
+    >
       <div className="relative z-10 max-w-2xl mx-auto px-12 py-10">
         <div className="invert-blend space-y-5 text-sm leading-7">
           {paragraphs.map((p, i) => (

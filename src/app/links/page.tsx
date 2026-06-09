@@ -53,7 +53,7 @@ export default async function LinksPage() {
                 href={item.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:opacity-80 underline"
+                className="no-underline hover:underline hover:opacity-80"
               >
                 {item.title}
               </a>
