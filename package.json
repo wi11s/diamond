@@ -39,5 +39,8 @@
     "tailwindcss": "^3.4.17",
     "three": "^0.179.1",
     "typescript": "^5.9.2"
+  },
+  "devDependencies": {
+    "puppeteer": "^25.1.0"
   }
 }
