@@ -47,7 +47,7 @@ export default function Navigation() {
 
         {/* Centered pill */}
         <div
-          className={`auto-hide hidden md:flex items-center gap-10 px-10 py-4 rounded-full ${plainStyle ? (whiteText ? 'text-white' : '') : 'invert-pill'}`}
+          className={`auto-hide hidden md:flex items-center gap-6 px-7 py-2.5 rounded-full ${plainStyle ? (whiteText ? 'text-white' : '') : 'invert-pill'}`}
           style={pathname === '/dates' ? { backdropFilter: 'invert(1) blur(16px)', WebkitBackdropFilter: 'invert(1) blur(16px)' } : undefined}
         >
           {navItems.map((item) => (
@@ -56,7 +56,7 @@ export default function Navigation() {
               href={item.href}
               prefetch
               onClick={(e) => handleNavClick(e, item.href)}
-              className={`text-xl font-bold uppercase tracking-widest transition-opacity duration-150 ${
+              className={`text-sm font-bold uppercase tracking-widest transition-opacity duration-150 ${
                 isPending && clickedHref === item.href
                   ? 'opacity-40'
                   : pathname === item.href
@@ -73,7 +73,7 @@ export default function Navigation() {
         <div className="flex-1 hidden md:flex justify-end">
           <a
             href="mailto:taylordiamond10@gmail.com"
-            className={`auto-hide text-sm font-bold tracking-widest uppercase px-5 py-2.5 rounded-full ${plainStyle ? 'invert-blend' : 'invert-pill'}`}
+            className={`auto-hide text-xs font-bold tracking-widest uppercase px-4 py-1.5 rounded-full ${plainStyle ? 'invert-blend' : 'invert-pill'}`}
             style={pathname === '/dates' ? { backdropFilter: 'invert(1) blur(16px)', WebkitBackdropFilter: 'invert(1) blur(16px)' } : undefined}
           >
             Work with me
