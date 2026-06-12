@@ -18,14 +18,13 @@ body {
   overscroll-behavior: none;
 }
 
-
 /* Invert text color against whatever is behind the element */
 .invert-blend {
   mix-blend-mode: difference;
   color: white;
 }
 
-/* Pill shape used inside an invert-blend parent — white bg inverts, black text punches through */
+/* Inverted pill — inverts and darkens the backdrop so white text stands out */
 .invert-pill {
   background: rgba(255, 255, 255, 0.08);
   backdrop-filter: invert(1) brightness(0.6);
@@ -34,23 +33,33 @@ body {
   text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
 }
 
-/* All UI chrome: hidden while loading, fade in on mount */
-.ui-chrome {
-  transition: opacity 300ms ease;
-}
-html.ui-loading .ui-chrome,
-html.ui-loading .auto-hide {
-  opacity: 0;
-  pointer-events: none;
+/* Frosted pill — plain blur, no inversion (bio nav) */
+.blur-pill {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(16px) brightness(0.9);
+  -webkit-backdrop-filter: blur(16px) brightness(0.9);
+  color: white;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
 }
 
-/* Auto-hide UI chrome on inactivity (toggled by .ui-idle on <html>) */
-.auto-hide {
-  transition: opacity 300ms ease;
+/* Local black & white filter — no blur, desaturates and darkens what's behind */
+.bw-pill {
+  backdrop-filter: grayscale(1) brightness(0.55);
+  -webkit-backdrop-filter: grayscale(1) brightness(0.55);
+  color: white;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
 }
-.ui-idle .auto-hide {
-  opacity: 0;
-  pointer-events: none;
+
+/* Loading screen: film-developing dots */
+.loading-dots span {
+  animation: dot-blink 1.2s infinite;
+}
+.loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+.loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes dot-blink {
+  0%, 60%, 100% { opacity: 0.15; }
+  30%           { opacity: 1; }
 }
 
 .scrollbar-hide {
@@ -62,57 +71,7 @@ html.ui-loading .auto-hide {
   display: none;
 }
 
-/* Irregular opening for Dates page white panel */
-.paper-opening {
-  /* Slightly imperfect edges using clip-path polygons */
-  clip-path: polygon(
-    2% 3%, 5% 1%, 12% 0%, 20% 2%, 28% 1%, 36% 2%, 45% 0%, 55% 2%,
-    64% 1%, 72% 3%, 80% 2%, 88% 1%, 95% 3%, 98% 6%, 99% 12%, 98% 20%,
-    99% 28%, 98% 36%, 99% 45%, 98% 55%, 99% 64%, 98% 72%, 99% 80%, 98% 88%,
-    97% 94%, 94% 98%, 88% 99%, 80% 98%, 72% 99%, 64% 98%, 55% 99%, 45% 98%,
-    36% 99%, 28% 98%, 20% 99%, 12% 98%, 6% 97%, 3% 94%, 1% 88%, 2% 80%,
-    1% 72%, 2% 64%, 1% 55%, 2% 45%, 1% 36%, 2% 28%, 1% 20%, 2% 12%
-  );
-}
-
-@media (min-width: 768px) {
-  .paper-opening {
-    clip-path: polygon(
-      1% 4%, 6% 1%, 14% 0%, 22% 2%, 30% 1%, 38% 2%, 47% 0%, 57% 2%,
-      66% 1%, 74% 3%, 82% 2%, 90% 1%, 96% 4%, 99% 8%, 100% 14%, 99% 22%,
-      100% 30%, 99% 38%, 100% 47%, 99% 57%, 100% 66%, 99% 74%, 100% 82%, 99% 90%,
-      98% 96%, 93% 99%, 86% 100%, 78% 99%, 70% 100%, 62% 99%, 53% 100%, 43% 99%,
-      34% 100%, 26% 99%, 18% 100%, 10% 99%, 4% 98%, 1% 93%, 0% 86%, 1% 78%,
-      0% 70%, 1% 62%, 0% 53%, 1% 43%, 0% 34%, 1% 26%, 0% 18%, 1% 10%
-    );
-  }
-}
-
-/* Mask out a central opening from the collage so body background shows through */
-.collage-with-opening {
-  /* Center opening ~40% from top to give room for nav */
-  -webkit-mask-image: radial-gradient(ellipse at 50% 42%, transparent 0 22%, black 26% 100%);
-  mask-image: radial-gradient(ellipse at 50% 42%, transparent 0 22%, black 26% 100%);
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-size: cover;
-  mask-size: cover;
-}
-
-@media (min-width: 768px) {
-  .collage-with-opening {
-    -webkit-mask-image: radial-gradient(ellipse at 50% 40%, transparent 0 24%, black 28% 100%);
-    mask-image: radial-gradient(ellipse at 50% 40%, transparent 0 24%, black 28% 100%);
-  }
-}
-
-/* Landing page - film photograph grey glass aesthetic */
-.landing-page {
-  background: white;
-  position: relative;
-  overflow: hidden;
-}
-
+/* Film grain texture */
 .grain-overlay {
   position: absolute;
   inset: 0;

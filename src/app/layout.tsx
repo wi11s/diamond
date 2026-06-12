@@ -2,10 +2,6 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import Navigation from '@/components/Navigation'
-import SocialDock from '@/components/SocialDock'
-import UsageNotice from '@/components/UsageNotice'
-import InactivityHide from '@/components/InactivityHide'
-import { GalleryProvider } from '@/context/GalleryContext'
 import { Analytics } from "@vercel/analytics/next"
 
 const inter = Inter({ subsets: ['latin'] })
@@ -34,16 +30,10 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <Analytics />
       <body className={inter.className}>
-        <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('ui-loading')" }} />
-        <GalleryProvider>
-          <InactivityHide />
-          <Navigation />
-          <main className="min-h-screen">
-            {children}
-          </main>
-          <UsageNotice />
-          <SocialDock />
-        </GalleryProvider>
+        <Navigation />
+        <main className="min-h-screen">
+          {children}
+        </main>
       </body>
     </html>
   )

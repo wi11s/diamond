@@ -38,14 +38,14 @@ export default async function LinksPage() {
   return (
     <div className="min-h-screen flex items-center justify-center relative">
       <Image
-        src="https://res.cloudinary.com/dpaytjafy/image/upload/v1755556468/IMG_5071_kwkkun.jpg"
+        src="https://res.cloudinary.com/dpaytjafy/image/upload/f_auto,q_auto,w_1600/v1755556468/IMG_5071_kwkkun.jpg"
         alt=""
         fill
         className="object-cover"
         priority
         unoptimized
       />
-      <div className="invert-pill relative z-10 px-12 py-10 rounded-3xl">
+      <div className="bw-pill relative z-10 px-12 py-10">
         <ul className="space-y-3 text-base">
           {links.map((item) => (
             <li key={item.href}>

@@ -40,7 +40,7 @@ export default async function BioPage() {
     <div
       className="min-h-screen flex items-center justify-center py-32"
       style={{
-        backgroundImage: 'url(https://res.cloudinary.com/dpaytjafy/image/upload/v1755557536/IMG_7732_cnnrk4.jpg)',
+        backgroundImage: 'url(https://res.cloudinary.com/dpaytjafy/image/upload/f_auto,q_auto,w_1600/v1755557536/IMG_7732_cnnrk4.jpg)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }}

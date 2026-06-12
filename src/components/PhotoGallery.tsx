@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import Image from 'next/image'
 import { ChevronRight, Maximize2 } from 'lucide-react'
-import { useGallery } from '@/context/GalleryContext'
+import LoadingScreen from '@/components/LoadingScreen'
 
 interface Photo {
   id: string
@@ -19,166 +19,110 @@ interface PhotoShoot {
   photos: Photo[]
 }
 
-interface PhotoGalleryProps {
-  photoShoots: PhotoShoot[]
-}
-
-export default function PhotoGallery({ photoShoots }: PhotoGalleryProps) {
-  const { setPhotosLoaded } = useGallery()
+export default function PhotoGallery({ photoShoots }: { photoShoots: PhotoShoot[] }) {
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null)
-  const [loadedIds, setLoadedIds] = useState<Set<string>>(new Set())
   const [isExpandedLoaded, setIsExpandedLoaded] = useState(false)
-  const firstImageRefs = useRef<Record<number, HTMLDivElement | null>>({})
+  const [galleryReady, setGalleryReady] = useState(false)
+  const [showHint, setShowHint] = useState(false)
   const [titleMaxWidths, setTitleMaxWidths] = useState<Record<number, number>>({})
   const [canScroll, setCanScroll] = useState<Record<number, boolean>>({})
   const [fadedTitles, setFadedTitles] = useState<Set<number>>(new Set())
-  const [showHint, setShowHint] = useState(true)
+  const firstImageRefs = useRef<Record<number, HTMLDivElement | null>>({})
+  const containerRefs = useRef<Record<number, HTMLDivElement | null>>({})
+  const drag = useRef({ active: false, startX: 0, scrollLeft: 0, dragged: false })
 
-  useEffect(() => {
-    setPhotosLoaded(false)
-    return () => setPhotosLoaded(false)
-  }, [setPhotosLoaded])
+  const shoots = useMemo(
+    () => photoShoots.map((s) => ({ ...s, photos: Array.from(new Map(s.photos.map((p) => [p.id, p])).values()) })),
+    [photoShoots]
+  )
 
+  // Fallback: reveal even if image events don't fire
   useEffect(() => {
-    const t = setTimeout(() => setShowHint(false), 2000)
+    const t = setTimeout(() => setGalleryReady(true), 2500)
     return () => clearTimeout(t)
   }, [])
 
-  // Drag-to-scroll state
-  const dragState = useRef<Record<number, {
-    isDown: boolean
-    startX: number
-    scrollLeft: number
-    dragged: boolean
-  }>>({})
+  // Show hint only after the gallery is revealed
+  useEffect(() => {
+    if (!galleryReady) return
+    setShowHint(true)
+    const t = setTimeout(() => setShowHint(false), 2500)
+    return () => clearTimeout(t)
+  }, [galleryReady])
 
-  const measureFirstImage = (index: number) => {
-    const el = firstImageRefs.current[index]
-    if (el) {
-      const width = el.clientWidth
-      if (width && width > 0) {
-        setTitleMaxWidths(prev => {
-          if (prev[index] === width) return prev
-          return { ...prev, [index]: width }
-        })
-      }
-    }
+  // First-image width caps the title; scrollWidth decides the scroll hint
+  const measure = useCallback(() => {
+    const widths: Record<number, number> = {}
+    const scrollable: Record<number, boolean> = {}
+    shoots.forEach((_, i) => {
+      const w = firstImageRefs.current[i]?.clientWidth
+      if (w) widths[i] = w
+      const c = containerRefs.current[i]
+      if (c) scrollable[i] = c.scrollWidth > c.clientWidth + 1
+    })
+    setTitleMaxWidths(widths)
+    setCanScroll(scrollable)
+  }, [shoots])
+
+  useEffect(() => {
+    measure()
+    window.addEventListener('resize', measure)
+    return () => window.removeEventListener('resize', measure)
+  }, [measure])
+
+  // Close expanded photo with Escape
+  useEffect(() => {
+    if (!selectedPhoto) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setSelectedPhoto(null) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [selectedPhoto])
+
+  const onScroll = (e: React.UIEvent<HTMLDivElement>, index: number) => {
+    const beyond = e.currentTarget.scrollLeft > 10
+    setFadedTitles((prev) => {
+      if (prev.has(index) === beyond) return prev
+      const next = new Set(prev)
+      if (beyond) next.add(index)
+      else next.delete(index)
+      return next
+    })
   }
 
-  useEffect(() => {
-    const handleScroll = (event: Event) => {
-      const target = event.target as HTMLElement
-      const shootIndex = parseInt(target.id.replace('scroll-container-', ''))
-      if (isNaN(shootIndex)) return
-      const beyond = target.scrollLeft > 10
-      setFadedTitles(prev => {
-        const has = prev.has(shootIndex)
-        if (beyond && !has) { const next = new Set(prev); next.add(shootIndex); return next }
-        if (!beyond && has) { const next = new Set(prev); next.delete(shootIndex); return next }
-        return prev
-      })
-    }
+  // Drag-to-scroll
+  const onMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    drag.current = { active: true, startX: e.pageX, scrollLeft: e.currentTarget.scrollLeft, dragged: false }
+    e.currentTarget.style.cursor = 'grabbing'
+  }
 
-    photoShoots.forEach((_, index) => {
-      const container = document.getElementById(`scroll-container-${index}`)
-      if (container) {
-        container.addEventListener('scroll', handleScroll)
-        setCanScroll(prev => ({
-          ...prev,
-          [index]: container.scrollWidth > container.clientWidth + 1,
-        }))
-      }
-    })
-
-    return () => {
-      photoShoots.forEach((_, index) => {
-        const container = document.getElementById(`scroll-container-${index}`)
-        if (container) container.removeEventListener('scroll', handleScroll)
-      })
-    }
-  }, [photoShoots])
-
-  // Recalculate title max widths on resize
-  useEffect(() => {
-    const onResize = () => {
-      photoShoots.forEach((_, idx) => measureFirstImage(idx))
-      photoShoots.forEach((_, idx) => {
-        const container = document.getElementById(`scroll-container-${idx}`)
-        if (container) {
-          setCanScroll(prev => ({
-            ...prev,
-            [idx]: container.scrollWidth > container.clientWidth + 1,
-          }))
-        }
-      })
-    }
-    window.addEventListener('resize', onResize)
-    onResize()
-    return () => window.removeEventListener('resize', onResize)
-  }, [photoShoots])
-
-  // Drag-to-scroll handlers
-  const onMouseDown = useCallback((e: React.MouseEvent, index: number) => {
-    const container = document.getElementById(`scroll-container-${index}`)
-    if (!container) return
-    dragState.current[index] = {
-      isDown: true,
-      startX: e.pageX - container.offsetLeft,
-      scrollLeft: container.scrollLeft,
-      dragged: false,
-    }
-    container.style.cursor = 'grabbing'
-  }, [])
-
-  const onMouseMove = useCallback((e: React.MouseEvent, index: number) => {
-    const state = dragState.current[index]
-    if (!state?.isDown) return
-    const container = document.getElementById(`scroll-container-${index}`)
-    if (!container) return
+  const onMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!drag.current.active) return
     e.preventDefault()
-    const x = e.pageX - container.offsetLeft
-    const walk = x - state.startX
-    if (Math.abs(walk) > 5) {
-      state.dragged = true
-    }
-    container.scrollLeft = state.scrollLeft - walk
-  }, [])
+    const walk = e.pageX - drag.current.startX
+    if (Math.abs(walk) > 5) drag.current.dragged = true
+    e.currentTarget.scrollLeft = drag.current.scrollLeft - walk
+  }
 
-  const onMouseUp = useCallback((index: number) => {
-    const state = dragState.current[index]
-    if (!state) return
-    state.isDown = false
-    const container = document.getElementById(`scroll-container-${index}`)
-    if (container) container.style.cursor = 'grab'
-  }, [])
+  const endDrag = (e: React.MouseEvent<HTMLDivElement>) => {
+    drag.current.active = false
+    e.currentTarget.style.cursor = ''
+  }
 
-  const onMouseLeave = useCallback((index: number) => {
-    const state = dragState.current[index]
-    if (!state) return
-    state.isDown = false
-    const container = document.getElementById(`scroll-container-${index}`)
-    if (container) container.style.cursor = 'grab'
-  }, [])
-
-  const handlePhotoClick = useCallback((photo: Photo, shootIndex: number) => {
-    const state = dragState.current[shootIndex]
-    // Only open if user didn't drag
-    if (state?.dragged) return
-    setSelectedPhoto(photo)
-  }, [])
-
-  // Reset expanded loader when a new photo is opened
-  useEffect(() => {
+  const openPhoto = (photo: Photo) => {
+    if (drag.current.dragged) return
     setIsExpandedLoaded(false)
-  }, [selectedPhoto?.id])
+    setSelectedPhoto(photo)
+  }
 
   return (
     <div className="min-h-screen bg-white text-black">
+      {/* Loading overlay — fades out once the first image is ready */}
+      <LoadingScreen done={galleryReady} />
+
       {/* Swipe hint popup */}
       <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
         <div
-          className={`invert-pill rounded-2xl px-6 py-4 flex flex-col items-center gap-2 transition-opacity duration-500 ${showHint ? 'opacity-100' : 'opacity-0'}`}
-          style={{ backdropFilter: 'invert(1) blur(16px)', WebkitBackdropFilter: 'invert(1) blur(16px)' }}
+          className={`invert-pill px-6 py-4 flex flex-col items-center gap-2 transition-opacity duration-500 ${showHint ? 'opacity-100' : 'opacity-0'}`}
         >
           <div className="flex items-center gap-2 text-sm font-bold">
             <span>↕</span>
@@ -190,125 +134,94 @@ export default function PhotoGallery({ photoShoots }: PhotoGalleryProps) {
           </div>
         </div>
       </div>
-      {photoShoots.map((shoot, shootIndex) => (
-        <section
-          key={shoot.name}
-          className="h-screen relative overflow-y-hidden"
-        >
-          {/* Static Photoshoot Title at bottom */}
+
+      {shoots.map((shoot, shootIndex) => (
+        <section key={shoot.name} className="h-screen relative overflow-y-hidden">
+          {/* Static photoshoot title at bottom, fades once the row is scrolled */}
           <div
             className={`invert-blend absolute bottom-8 left-8 z-10 pointer-events-none transition-opacity duration-300 ${fadedTitles.has(shootIndex) ? 'opacity-0' : 'opacity-100'}`}
             style={{ maxWidth: titleMaxWidths[shootIndex] ? `${titleMaxWidths[shootIndex] - 32}px` : undefined }}
           >
-            <h2 className="text-3xl font-bold whitespace-normal break-words">
-              {shoot.name}
-            </h2>
+            <h2 className="text-3xl font-bold break-words">{shoot.name}</h2>
           </div>
 
-          <div className="relative h-screen overflow-hidden">
-            <div
-              id={`scroll-container-${shootIndex}`}
-              className="flex overflow-x-auto overflow-y-hidden scrollbar-hide h-screen select-none"
-              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', cursor: 'grab' }}
-              onMouseDown={(e) => onMouseDown(e, shootIndex)}
-              onMouseMove={(e) => onMouseMove(e, shootIndex)}
-              onMouseUp={() => onMouseUp(shootIndex)}
-              onMouseLeave={() => onMouseLeave(shootIndex)}
-            >
-              {Array.from(new Map(shoot.photos.map((p) => [p.id, p])).values()).map((photo, idx) => (
-                <div
-                  key={`${photo.id}-${idx}`}
-                  className="flex-shrink-0 cursor-pointer h-screen"
-                  onClick={() => handlePhotoClick(photo, shootIndex)}
-                >
-                  <div
-                    className="relative w-auto h-screen overflow-hidden"
-                    ref={(el) => {
-                      if (idx === 0) {
-                        firstImageRefs.current[shootIndex] = el
-                        if (el) {
-                          requestAnimationFrame(() => measureFirstImage(shootIndex))
-                        }
-                      }
-                    }}
-                  >
-                    <Image
-                      src={photo.src}
-                      alt={photo.alt}
-                      width={photo.width}
-                      height={photo.height}
-                      className="h-screen w-auto object-contain"
-                      draggable={false}
-                      onLoadingComplete={() => {
-                        setLoadedIds((prev) => { const next = new Set(prev); next.add(photo.id); return next })
-                        if (idx === 0 && shootIndex === 0) setPhotosLoaded(true)
-                        if (idx === 0) measureFirstImage(shootIndex)
-                      }}
-                      sizes="100vh"
-                    />
-                    {/* Loading skeleton overlay */}
-                    <div className={`${loadedIds.has(photo.id) ? 'opacity-0' : 'opacity-100'} absolute inset-0 bg-gradient-to-b from-black/10 to-transparent transition-opacity duration-500`} />
-                    {/* Expand icon */}
-                    <div className="auto-hide absolute bottom-4 right-4 text-white/70 drop-shadow-lg pointer-events-none">
-                      <Maximize2 size={16} />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            {/* Subtle scroll hint: right-edge gradient + chevron, hidden after scroll */}
-            <div
-              className={`pointer-events-none absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-black/20 to-transparent transition-opacity duration-300 ${
-                canScroll[shootIndex] ? 'opacity-100' : 'opacity-0'
-              }`}
-            />
-            <ChevronRight
-              className={`auto-hide invert-blend hidden md:block pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 transition-opacity duration-300 ${
-                canScroll[shootIndex] ? 'opacity-100' : 'opacity-0'
-              }`}
-              size={20}
-            />
+          <div
+            ref={(el) => { containerRefs.current[shootIndex] = el }}
+            className="flex overflow-x-auto overflow-y-hidden scrollbar-hide h-screen select-none cursor-grab"
+            onScroll={(e) => onScroll(e, shootIndex)}
+            onMouseDown={onMouseDown}
+            onMouseMove={onMouseMove}
+            onMouseUp={endDrag}
+            onMouseLeave={endDrag}
+          >
+            {shoot.photos.map((photo, idx) => (
+              <div
+                key={photo.id}
+                ref={idx === 0 ? (el) => { firstImageRefs.current[shootIndex] = el } : undefined}
+                className="relative flex-shrink-0 h-screen overflow-hidden cursor-pointer"
+                onClick={() => openPhoto(photo)}
+              >
+                <Image
+                  src={photo.src}
+                  alt={photo.alt}
+                  width={photo.width}
+                  height={photo.height}
+                  className="h-screen w-auto object-contain"
+                  draggable={false}
+                  priority={shootIndex === 0 && idx < 3}
+                  sizes="100vh"
+                  onLoad={() => {
+                    if (idx !== 0) return
+                    measure()
+                    if (shootIndex === 0) setGalleryReady(true)
+                  }}
+                />
+                <Maximize2 size={16} className="absolute bottom-4 right-4 text-white/70 drop-shadow-lg pointer-events-none" />
+              </div>
+            ))}
           </div>
+
+          {/* Scroll hint: right-edge gradient + chevron while the row can scroll */}
+          <div
+            className={`pointer-events-none absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-black/20 to-transparent transition-opacity duration-300 ${canScroll[shootIndex] ? 'opacity-100' : 'opacity-0'}`}
+          />
+          <ChevronRight
+            size={20}
+            className={`invert-blend hidden md:block pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 transition-opacity duration-300 ${canScroll[shootIndex] ? 'opacity-100' : 'opacity-0'}`}
+          />
         </section>
       ))}
 
       {selectedPhoto && (
         <div
-          className="fixed inset-0 bg-white z-50 flex items-center justify-center p-6"
+          className="fixed inset-0 bg-white z-50 p-6"
           onClick={() => setSelectedPhoto(null)}
         >
-          <div
-            className="relative w-full h-full"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="relative w-full h-full">
-              <Image
-                src={selectedPhoto.public_id && process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
-                  ? `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/${selectedPhoto.public_id}`
-                  : selectedPhoto.src}
-                alt={selectedPhoto.alt}
-                fill
-                className="object-contain"
-                sizes="100vw"
-                unoptimized
-                onLoadingComplete={() => setIsExpandedLoaded(true)}
-              />
-              <div
-                className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 ${
-                  isExpandedLoaded ? 'opacity-0' : 'opacity-100'
-                }`}
-              >
+          <div className="relative w-full h-full">
+            <Image
+              src={selectedPhoto.public_id && process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
+                ? `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/${selectedPhoto.public_id}`
+                : selectedPhoto.src}
+              alt={selectedPhoto.alt}
+              fill
+              className="object-contain"
+              sizes="100vw"
+              unoptimized
+              onLoad={() => setIsExpandedLoaded(true)}
+            />
+            {!isExpandedLoaded && (
+              <div className="absolute inset-0 flex items-center justify-center">
                 <div className="w-6 h-6 border-[3px] border-transparent border-t-gray-300 rounded-full animate-spin" />
               </div>
-            </div>
-            <button
-              onClick={() => setSelectedPhoto(null)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl"
-              aria-label="Close"
-            >
-              ×
-            </button>
+            )}
           </div>
+          <button
+            onClick={() => setSelectedPhoto(null)}
+            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl"
+            aria-label="Close"
+          >
+            ×
+          </button>
         </div>
       )}
     </div>

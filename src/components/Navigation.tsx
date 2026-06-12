@@ -3,8 +3,7 @@
 import { useState, useTransition, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Menu, X } from 'lucide-react'
-import { useGallery } from '@/context/GalleryContext'
+import { Instagram, Menu, X } from 'lucide-react'
 
 const navItems = [
   { href: '/portraits', label: 'Portraits' },
@@ -14,24 +13,23 @@ const navItems = [
   { href: '/bio', label: 'Bio' },
 ]
 
+const INSTAGRAM_URL = 'https://www.instagram.com/its_taylor_diamond/'
+
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
   const [clickedHref, setClickedHref] = useState<string | null>(null)
   const pathname = usePathname()
   const router = useRouter()
-  const { photosLoaded } = useGallery()
-
-  const isGalleryPage = pathname?.startsWith('/portraits') || pathname?.startsWith('/landscape')
-  const plainStyle = pathname === '/links' || pathname === '/bio' || (isGalleryPage && !photosLoaded)
-  // Pill bg suppressed only on /links and while gallery loads; bio gets invert-pill same as dates
-  const noPillBg = pathname === '/links' || (isGalleryPage && !photosLoaded)
 
   useEffect(() => {
     setClickedHref(null)
   }, [pathname])
 
   if (pathname === '/' || pathname === '/scroll') return null
+
+  // Full-width header band: inverted by default, plain blur on bio, bare on links
+  const barStyle = pathname === '/links' ? '' : pathname === '/bio' ? 'blur-pill' : 'invert-pill'
 
   const handleNavClick = (e: React.MouseEvent, href: string) => {
     e.preventDefault()
@@ -41,85 +39,75 @@ export default function Navigation() {
 
   return (
     <>
-      {/* Pill-shaped blur backdrop for bio — must be its own fixed element, not a child of the fixed nav */}
-      {pathname === '/bio' && (
-        <div
-          className="hidden md:block fixed pointer-events-none rounded-full auto-hide ui-chrome"
-          style={{
-            top: '1.5rem',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: '470px',
-            height: '41px',
-            zIndex: 39,
-            backdropFilter: 'blur(20px) brightness(0.9)',
-            WebkitBackdropFilter: 'blur(20px) brightness(0.9)',
-          }}
-        />
-      )}
-
-      {/* Desktop nav */}
-      <nav className="fixed top-0 left-0 right-0 z-40 p-6 flex items-center">
-        {/* Left spacer */}
-        <div className="flex-1 hidden md:block" />
-
-        {/* Centered pill */}
-        <div
-          className={`ui-chrome auto-hide hidden md:flex items-center gap-6 px-7 py-2.5 rounded-full ${noPillBg ? '' : 'invert-pill'}`}
-          style={
-            pathname === '/dates'
-              ? { backdropFilter: 'invert(1) blur(16px)', WebkitBackdropFilter: 'invert(1) blur(16px)' }
-              : undefined
-          }
-        >
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              prefetch
-              onClick={(e) => handleNavClick(e, item.href)}
-              className={`text-sm font-bold uppercase tracking-widest transition-opacity duration-150 ${
-                isPending && clickedHref === item.href
-                  ? 'opacity-40'
-                  : pathname === item.href
-                  ? 'underline underline-offset-4'
-                  : 'opacity-55'
-              }`}
-            >
-              {item.label}
+      <nav className={`fixed top-0 inset-x-0 z-40 ${barStyle}`}>
+        <div className="relative flex items-center justify-between h-14 px-5 md:px-7">
+          <div className="flex items-baseline gap-3">
+            <Link href="/" className="text-sm font-bold tracking-widest uppercase">
+              Taylor Diamond
             </Link>
-          ))}
-        </div>
+            {(pathname?.startsWith('/portraits') || pathname?.startsWith('/landscape')) && (
+              <span className="text-[10px] font-medium uppercase tracking-[0.2em] opacity-50 whitespace-nowrap">
+                All photos ©
+              </span>
+            )}
+          </div>
 
-        {/* Work with me — right */}
-        <div className="flex-1 hidden md:flex justify-end">
-          <a
-            href="mailto:taylordiamond10@gmail.com"
-            className={`ui-chrome auto-hide text-xs font-bold tracking-widest uppercase px-4 py-1.5 rounded-full ${plainStyle ? 'invert-blend' : 'invert-pill'}`}
-            style={
-              pathname === '/dates'
-                ? { backdropFilter: 'invert(1) blur(16px)', WebkitBackdropFilter: 'invert(1) blur(16px)' }
-                : undefined
-            }
+          {/* Centered nav links */}
+          <div className="hidden md:flex items-center gap-6 absolute left-1/2 -translate-x-1/2">
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                prefetch
+                onClick={(e) => handleNavClick(e, item.href)}
+                className={`text-sm font-medium uppercase tracking-widest transition-opacity duration-150 ${
+                  isPending && clickedHref === item.href
+                    ? 'opacity-40'
+                    : pathname === item.href
+                    ? 'underline underline-offset-4'
+                    : 'opacity-55'
+                }`}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+
+          {/* Instagram + Work with me — right */}
+          <div className="hidden md:flex items-center gap-5">
+            <a
+              href={INSTAGRAM_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram @its_taylor_diamond"
+              className="opacity-70 hover:opacity-100 transition-opacity duration-150"
+            >
+              <Instagram size={18} />
+            </a>
+            <a
+              href="mailto:taylordiamond10@gmail.com"
+              className="bg-white/20 backdrop-blur-md text-xs font-bold tracking-widest uppercase px-3 py-1.5 hover:bg-white/35 transition-colors duration-150"
+            >
+              Work with me
+            </a>
+          </div>
+
+          {/* Mobile toggle */}
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="md:hidden p-2 -mr-2"
+            aria-label={isOpen ? 'Close menu' : 'Open menu'}
           >
-            Work with me
-          </a>
+            {isOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
         </div>
-
-        {/* Mobile toggle */}
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="md:hidden p-2 rounded-full"
-        >
-          {isOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
       </nav>
 
       {/* Mobile menu */}
       {isOpen && (
         <div className="fixed inset-0 z-40 md:hidden">
           <img
-            src="https://res.cloudinary.com/dpaytjafy/image/upload/v1755557549/IMG_7764_dnee02.jpg"
+            src="https://res.cloudinary.com/dpaytjafy/image/upload/f_auto,q_auto,w_1600/v1755557549/IMG_7764_dnee02.jpg"
             alt=""
             className="absolute inset-0 w-full h-full object-cover"
           />
@@ -131,7 +119,7 @@ export default function Navigation() {
             >
               <X size={24} />
             </button>
-            <div className="invert-pill flex flex-col items-center gap-8 px-12 py-10 rounded-3xl">
+            <div className="invert-pill flex flex-col items-center gap-8 px-12 py-10">
               {navItems.map((item) => (
                 <Link
                   key={item.href}
@@ -148,9 +136,18 @@ export default function Navigation() {
               <a
                 href="mailto:taylordiamond10@gmail.com"
                 onClick={() => setIsOpen(false)}
-                className="text-sm font-medium tracking-widest uppercase border border-white/50 hover:border-white text-white/80 hover:text-white px-5 py-2 rounded-full transition-colors duration-150"
+                className="bg-white/20 backdrop-blur-md text-sm font-bold tracking-widest uppercase px-5 py-2 hover:bg-white/35 transition-colors duration-150"
               >
                 Work with me
+              </a>
+              <a
+                href={INSTAGRAM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram @its_taylor_diamond"
+                className="opacity-70 hover:opacity-100 transition-opacity duration-150 -mt-2"
+              >
+                <Instagram size={20} />
               </a>
             </div>
           </div>
