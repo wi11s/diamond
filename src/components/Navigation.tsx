@@ -86,7 +86,7 @@ export default function Navigation() {
             </a>
             <a
               href="mailto:taylordiamond10@gmail.com"
-              className="bg-white/20 backdrop-blur-md text-xs font-bold tracking-widest uppercase px-3 py-1.5 hover:bg-white/35 transition-colors duration-150"
+              className="text-xs font-bold tracking-widest uppercase hover:opacity-70 transition-opacity duration-150"
             >
               Work with me
             </a>
@@ -136,7 +136,7 @@ export default function Navigation() {
               <a
                 href="mailto:taylordiamond10@gmail.com"
                 onClick={() => setIsOpen(false)}
-                className="bg-white/20 backdrop-blur-md text-sm font-bold tracking-widest uppercase px-5 py-2 hover:bg-white/35 transition-colors duration-150"
+                className="text-sm font-bold tracking-widest uppercase hover:opacity-70 transition-opacity duration-150"
               >
                 Work with me
               </a>
