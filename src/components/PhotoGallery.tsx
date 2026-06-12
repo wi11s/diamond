@@ -119,6 +119,20 @@ export default function PhotoGallery({ photoShoots }: { photoShoots: PhotoShoot[
       {/* Loading overlay — fades out once the first image is ready */}
       <LoadingScreen done={galleryReady} />
 
+      {/* In-flow sliver of the first photo's bottom edge — sits behind the header at the
+          top of the page and simply scrolls away with the content */}
+      {shoots[0]?.photos[0] && (
+        <div aria-hidden className="relative h-14 overflow-hidden">
+          <Image
+            src={shoots[0].photos[0].src}
+            alt=""
+            fill
+            className="object-cover object-bottom"
+            sizes="100vw"
+          />
+        </div>
+      )}
+
       {/* Swipe hint popup */}
       <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
         <div
@@ -136,7 +150,7 @@ export default function PhotoGallery({ photoShoots }: { photoShoots: PhotoShoot[
       </div>
 
       {shoots.map((shoot, shootIndex) => (
-        <section key={shoot.name} className="h-screen relative overflow-y-hidden">
+        <section key={shoot.name} className="relative overflow-y-hidden h-[calc(100dvh-3.5rem)]">
           {/* Static photoshoot title at bottom, fades once the row is scrolled */}
           <div
             className={`invert-blend absolute bottom-8 left-8 z-10 pointer-events-none transition-opacity duration-300 ${fadedTitles.has(shootIndex) ? 'opacity-0' : 'opacity-100'}`}
@@ -147,7 +161,7 @@ export default function PhotoGallery({ photoShoots }: { photoShoots: PhotoShoot[
 
           <div
             ref={(el) => { containerRefs.current[shootIndex] = el }}
-            className="flex overflow-x-auto overflow-y-hidden scrollbar-hide h-screen select-none cursor-grab"
+            className="flex overflow-x-auto overflow-y-hidden scrollbar-hide h-full select-none cursor-grab"
             onScroll={(e) => onScroll(e, shootIndex)}
             onMouseDown={onMouseDown}
             onMouseMove={onMouseMove}
@@ -158,7 +172,7 @@ export default function PhotoGallery({ photoShoots }: { photoShoots: PhotoShoot[
               <div
                 key={photo.id}
                 ref={idx === 0 ? (el) => { firstImageRefs.current[shootIndex] = el } : undefined}
-                className="relative flex-shrink-0 h-screen overflow-hidden cursor-pointer"
+                className="relative flex-shrink-0 h-full overflow-hidden cursor-pointer"
                 onClick={() => openPhoto(photo)}
               >
                 <Image
@@ -166,7 +180,7 @@ export default function PhotoGallery({ photoShoots }: { photoShoots: PhotoShoot[
                   alt={photo.alt}
                   width={photo.width}
                   height={photo.height}
-                  className="h-screen w-auto object-contain"
+                  className="h-full w-auto object-contain"
                   draggable={false}
                   priority={shootIndex === 0 && idx < 3}
                   sizes="100vh"
