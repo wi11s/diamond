@@ -103,7 +103,17 @@ export default function Navigation() {
 
   if (pathname === '/' || pathname === '/scroll') return null
 
-  const barStyle = pathname === '/links' ? '' : pathname === '/bio' ? 'blur-pill' : 'invert-pill'
+  const isDates = pathname === '/dates'
+  const posClass = isDates
+    ? 'fixed top-0 inset-x-0 z-40'
+    : 'fixed top-3 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-2rem)] max-w-5xl rounded-full'
+  const barStyle = isDates
+    ? 'bg-white text-black'
+    : pathname === '/links'
+    ? ''
+    : pathname === '/bio'
+    ? 'blur-pill'
+    : 'invert-pill'
 
   const handleNavClick = (e: React.MouseEvent, href: string) => {
     e.preventDefault()
@@ -114,7 +124,7 @@ export default function Navigation() {
   return (
     <>
       <nav
-        className={`fixed top-3 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-2rem)] max-w-5xl rounded-full transition-opacity duration-500 ${barStyle} ${visible || isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        className={`${posClass} transition-opacity duration-500 ${barStyle} ${visible || isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
       >
         <div className="relative flex items-center justify-between h-14 px-5 md:px-7">
           <div className="flex items-baseline gap-3">
