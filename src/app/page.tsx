@@ -21,7 +21,7 @@ export default function Home() {
         priority
         unoptimized
       />
-      <div className="bw-pill relative z-10 flex flex-col items-center gap-8 px-12 py-10">
+      <div className="bw-pill rounded-2xl relative z-10 flex flex-col items-center gap-8 px-12 py-10">
         <p className="text-sm font-medium tracking-widest uppercase text-white/80">Taylor Diamond</p>
         <nav>
           <ul className="flex flex-col items-center gap-3">

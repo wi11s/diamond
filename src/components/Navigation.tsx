@@ -20,12 +20,21 @@ export default function Navigation() {
   const [isPending, startTransition] = useTransition()
   const [clickedHref, setClickedHref] = useState<string | null>(null)
   const [visible, setVisible] = useState(true)
+  const [isMobile, setIsMobile] = useState(false)
   const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const visibleRef = useRef(true)
   const hidePos = useRef<{ x: number; y: number } | null>(null)
   const lastPos = useRef<{ x: number; y: number } | null>(null)
   const pathname = usePathname()
   const router = useRouter()
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)')
+    setIsMobile(mq.matches)
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
 
   useEffect(() => {
     setClickedHref(null)
@@ -124,7 +133,7 @@ export default function Navigation() {
   return (
     <>
       <nav
-        className={`${posClass} transition-opacity duration-500 ${barStyle} ${visible || isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        className={`${posClass} transition-opacity duration-500 ${barStyle} ${isMobile || visible || isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
       >
         <div className="relative flex items-center justify-between h-14 px-5 md:px-7">
           <div className="flex items-baseline gap-3">
@@ -186,7 +195,7 @@ export default function Navigation() {
 
       {/* Mobile menu */}
       {isOpen && (
-        <div className="fixed inset-0 z-40 md:hidden">
+        <div className="fixed inset-0 z-50 md:hidden">
           <img
             src="https://res.cloudinary.com/dpaytjafy/image/upload/f_auto,q_auto,w_1600/v1755557549/IMG_7764_dnee02.jpg"
             alt=""
@@ -200,36 +209,48 @@ export default function Navigation() {
             >
               <X size={24} />
             </button>
-            <div className="invert-pill flex flex-col items-center gap-8 px-12 py-10">
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  prefetch
-                  onClick={(e) => { setIsOpen(false); handleNavClick(e, item.href) }}
-                  className={`text-base font-medium transition-opacity duration-150 ${
-                    isPending && clickedHref === item.href ? 'opacity-40' : pathname === item.href ? 'underline underline-offset-4' : 'opacity-55'
-                  }`}
+            <div className="bw-pill rounded-2xl relative z-10 flex flex-col items-center gap-8 px-12 py-10">
+              <p className="text-sm font-medium tracking-widest uppercase text-white/80">Taylor Diamond</p>
+              <nav>
+                <ul className="flex flex-col items-center gap-3">
+                  {navItems.map((item) => (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        prefetch
+                        onClick={(e) => { setIsOpen(false); handleNavClick(e, item.href) }}
+                        className={`text-base font-medium transition-colors duration-150 ${
+                          isPending && clickedHref === item.href
+                            ? 'text-white/40'
+                            : pathname === item.href
+                            ? 'text-white underline underline-offset-4'
+                            : 'text-white/90 hover:text-white'
+                        }`}
+                      >
+                        {item.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+              <div className="flex items-center gap-4">
+                <a
+                  href="mailto:taylordiamond10@gmail.com"
+                  onClick={() => setIsOpen(false)}
+                  className="text-sm font-medium tracking-widest uppercase border border-white/50 hover:border-white text-white/80 hover:text-white px-5 py-2 transition-colors duration-150"
                 >
-                  {item.label}
-                </Link>
-              ))}
-              <a
-                href="mailto:taylordiamond10@gmail.com"
-                onClick={() => setIsOpen(false)}
-                className="text-sm font-bold tracking-widest uppercase hover:opacity-70 transition-opacity duration-150"
-              >
-                Work with me
-              </a>
-              <a
-                href={INSTAGRAM_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Instagram @its_taylor_diamond"
-                className="opacity-70 hover:opacity-100 transition-opacity duration-150 -mt-2"
-              >
-                <Instagram size={20} />
-              </a>
+                  Work with me
+                </a>
+                <a
+                  href={INSTAGRAM_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Instagram @its_taylor_diamond"
+                  className="text-white/80 hover:text-white transition-colors duration-150"
+                >
+                  <Instagram size={18} />
+                </a>
+              </div>
             </div>
           </div>
         </div>
