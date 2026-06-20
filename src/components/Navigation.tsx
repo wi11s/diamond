@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition, useEffect } from 'react'
+import { useState, useTransition, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { Instagram, Menu, X } from 'lucide-react'
@@ -19,6 +19,11 @@ export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
   const [clickedHref, setClickedHref] = useState<string | null>(null)
+  const [visible, setVisible] = useState(true)
+  const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const visibleRef = useRef(true)
+  const hidePos = useRef<{ x: number; y: number } | null>(null)
+  const lastPos = useRef<{ x: number; y: number } | null>(null)
   const pathname = usePathname()
   const router = useRouter()
 
@@ -26,9 +31,38 @@ export default function Navigation() {
     setClickedHref(null)
   }, [pathname])
 
+  useEffect(() => {
+    const show = (e?: MouseEvent) => {
+      if (e) lastPos.current = { x: e.clientX, y: e.clientY }
+
+      // Require 30px of movement from where it hid before reappearing
+      if (!visibleRef.current && hidePos.current && e) {
+        const dx = e.clientX - hidePos.current.x
+        const dy = e.clientY - hidePos.current.y
+        if (Math.sqrt(dx * dx + dy * dy) < 30) return
+      }
+
+      visibleRef.current = true
+      setVisible(true)
+      if (hideTimer.current) clearTimeout(hideTimer.current)
+      hideTimer.current = setTimeout(() => {
+        visibleRef.current = false
+        hidePos.current = lastPos.current
+        setVisible(false)
+      }, 3000)
+    }
+    show()
+    document.addEventListener('mousemove', show)
+    document.addEventListener('touchstart', show as EventListener)
+    return () => {
+      document.removeEventListener('mousemove', show)
+      document.removeEventListener('touchstart', show as EventListener)
+      if (hideTimer.current) clearTimeout(hideTimer.current)
+    }
+  }, [])
+
   if (pathname === '/' || pathname === '/scroll') return null
 
-  // Full-width header band: inverted by default, plain blur on bio, bare on links
   const barStyle = pathname === '/links' ? '' : pathname === '/bio' ? 'blur-pill' : 'invert-pill'
 
   const handleNavClick = (e: React.MouseEvent, href: string) => {
@@ -39,17 +73,14 @@ export default function Navigation() {
 
   return (
     <>
-      <nav className={`fixed top-0 inset-x-0 z-40 ${barStyle}`}>
+      <nav
+        className={`fixed top-3 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-2rem)] max-w-5xl rounded-full transition-opacity duration-500 ${barStyle} ${visible || isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+      >
         <div className="relative flex items-center justify-between h-14 px-5 md:px-7">
           <div className="flex items-baseline gap-3">
             <Link href="/" className="text-sm font-bold tracking-widest uppercase">
               Taylor Diamond
             </Link>
-            {(pathname?.startsWith('/portraits') || pathname?.startsWith('/landscape')) && (
-              <span className="text-[10px] font-medium uppercase tracking-[0.2em] opacity-50 whitespace-nowrap">
-                All photos ©
-              </span>
-            )}
           </div>
 
           {/* Centered nav links */}

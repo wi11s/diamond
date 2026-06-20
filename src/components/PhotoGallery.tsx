@@ -46,7 +46,7 @@ export default function PhotoGallery({ photoShoots }: { photoShoots: PhotoShoot[
   useEffect(() => {
     if (!galleryReady) return
     setShowHint(true)
-    const t = setTimeout(() => setShowHint(false), 2500)
+    const t = setTimeout(() => setShowHint(false), 3500)
     return () => clearTimeout(t)
   }, [galleryReady])
 
@@ -119,20 +119,6 @@ export default function PhotoGallery({ photoShoots }: { photoShoots: PhotoShoot[
       {/* Loading overlay — fades out once the first image is ready */}
       <LoadingScreen done={galleryReady} />
 
-      {/* In-flow sliver of the first photo's bottom edge — sits behind the header at the
-          top of the page and simply scrolls away with the content */}
-      {shoots[0]?.photos[0] && (
-        <div aria-hidden className="relative h-14 overflow-hidden">
-          <Image
-            src={shoots[0].photos[0].src}
-            alt=""
-            fill
-            className="object-cover object-bottom"
-            sizes="100vw"
-          />
-        </div>
-      )}
-
       {/* Swipe hint popup */}
       <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
         <div
@@ -145,6 +131,9 @@ export default function PhotoGallery({ photoShoots }: { photoShoots: PhotoShoot[
           <div className="flex items-center gap-2 text-sm font-bold">
             <span>↔</span>
             <span>Swipe side to side for photos</span>
+          </div>
+          <div className="text-[10px] font-medium uppercase tracking-[0.2em] opacity-50 mt-1">
+            All photos ©
           </div>
         </div>
       </div>
