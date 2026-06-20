@@ -16,7 +16,7 @@ async function fetchFliers() {
       const result = await cloudinary.search
         .expression(`folder:"DJ/${sub}"`)
         .sort_by('created_at', 'desc')
-        .max_results(60)
+        .max_results(500)
         .execute();
       for (const r of (result?.resources || [])) {
         collected.push(cloudinary.url(r.public_id, {
@@ -35,12 +35,14 @@ async function main() {
   if (!urls.length) { console.error('No fliers found'); process.exit(1); }
   console.log(`Got ${urls.length} fliers`);
 
-  const COLS = 8;
+  // 9 cols × 5 rows = ratio 1.8 ≈ 16:9, so bg-cover shows all rows with minimal side crop
+  const COLS = 9;
+  const ROWS = 5;
   const CELL = 240;
-  const total = COLS * Math.ceil(96 / COLS);
+  const total = COLS * ROWS;
   const pool = Array.from({ length: total }, (_, i) => urls[i % urls.length]);
   const WIDTH = COLS * CELL;
-  const HEIGHT = Math.ceil(total / COLS) * CELL;
+  const HEIGHT = ROWS * CELL;
 
   const cells = pool.map(src =>
     `<div style="width:${CELL}px;height:${CELL}px;overflow:hidden;flex-shrink:0">
