@@ -29,10 +29,31 @@ export default function Navigation() {
 
   useEffect(() => {
     setClickedHref(null)
+    visibleRef.current = true
+    setVisible(true)
+    hidePos.current = null
+    if (hideTimer.current) clearTimeout(hideTimer.current)
+    hideTimer.current = setTimeout(() => {
+      visibleRef.current = false
+      hidePos.current = lastPos.current
+      setVisible(false)
+    }, 3500)
   }, [pathname])
 
   useEffect(() => {
+    let scrolling = false
+    let scrollClear: ReturnType<typeof setTimeout> | null = null
+
+    const onScroll = () => {
+      scrolling = true
+      if (scrollClear) clearTimeout(scrollClear)
+      scrollClear = setTimeout(() => { scrolling = false }, 200)
+    }
+
     const show = (e?: MouseEvent) => {
+      // Mouse movement during a scroll gesture should not reset the timer
+      if (scrolling && e?.type === 'mousemove') return
+
       if (e) lastPos.current = { x: e.clientX, y: e.clientY }
 
       // Require 30px of movement from where it hid before reappearing
@@ -49,15 +70,34 @@ export default function Navigation() {
         visibleRef.current = false
         hidePos.current = lastPos.current
         setVisible(false)
-      }, 3000)
+      }, 3500)
     }
+    const onGalleryReady = () => {
+      visibleRef.current = true
+      setVisible(true)
+      hidePos.current = null
+      if (hideTimer.current) clearTimeout(hideTimer.current)
+      hideTimer.current = setTimeout(() => {
+        visibleRef.current = false
+        hidePos.current = lastPos.current
+        setVisible(false)
+      }, 3500)
+    }
+
     show()
     document.addEventListener('mousemove', show)
-    document.addEventListener('touchstart', show as EventListener)
+    document.addEventListener('click', show as EventListener)
+    document.addEventListener('wheel', onScroll, { passive: true })
+    document.addEventListener('touchmove', onScroll, { passive: true })
+    document.addEventListener('gallery-ready', onGalleryReady)
     return () => {
       document.removeEventListener('mousemove', show)
-      document.removeEventListener('touchstart', show as EventListener)
+      document.removeEventListener('click', show as EventListener)
+      document.removeEventListener('wheel', onScroll)
+      document.removeEventListener('touchmove', onScroll)
+      document.removeEventListener('gallery-ready', onGalleryReady)
       if (hideTimer.current) clearTimeout(hideTimer.current)
+      if (scrollClear) clearTimeout(scrollClear)
     }
   }, [])
 

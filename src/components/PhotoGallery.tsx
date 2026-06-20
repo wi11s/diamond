@@ -42,9 +42,10 @@ export default function PhotoGallery({ photoShoots }: { photoShoots: PhotoShoot[
     return () => clearTimeout(t)
   }, [])
 
-  // Show hint only after the gallery is revealed
+  // Show hint only after the gallery is revealed; sync nav hide timer
   useEffect(() => {
     if (!galleryReady) return
+    document.dispatchEvent(new CustomEvent('gallery-ready'))
     setShowHint(true)
     const t = setTimeout(() => setShowHint(false), 3500)
     return () => clearTimeout(t)
@@ -122,7 +123,7 @@ export default function PhotoGallery({ photoShoots }: { photoShoots: PhotoShoot[
       {/* Swipe hint popup */}
       <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
         <div
-          className={`invert-pill px-6 py-4 flex flex-col items-center gap-2 transition-opacity duration-500 ${showHint ? 'opacity-100' : 'opacity-0'}`}
+          className={`invert-pill rounded-2xl px-6 py-4 flex flex-col items-center gap-2 transition-opacity duration-500 ${showHint ? 'opacity-100' : 'opacity-0'}`}
         >
           <div className="flex items-center gap-2 text-sm font-bold">
             <span>↕</span>
