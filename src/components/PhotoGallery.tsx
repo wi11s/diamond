@@ -143,7 +143,7 @@ export default function PhotoGallery({ photoShoots }: { photoShoots: PhotoShoot[
         <section key={shoot.name} className="relative overflow-y-hidden h-[calc(100dvh-3.5rem)]">
           {/* Static photoshoot title at bottom, fades once the row is scrolled */}
           <div
-            className={`invert-blend absolute bottom-8 left-8 z-10 pointer-events-none transition-opacity duration-300 ${fadedTitles.has(shootIndex) ? 'opacity-0' : 'opacity-100'}`}
+            className={`absolute bottom-8 left-8 z-10 pointer-events-none transition-opacity duration-300 text-white drop-shadow-[0_1px_8px_rgba(0,0,0,0.6)] ${fadedTitles.has(shootIndex) ? 'opacity-0' : 'opacity-100'}`}
             style={{ maxWidth: titleMaxWidths[shootIndex] ? `${titleMaxWidths[shootIndex] - 32}px` : undefined }}
           >
             <h2 className="text-3xl font-bold break-words">{shoot.name}</h2>
@@ -191,7 +191,7 @@ export default function PhotoGallery({ photoShoots }: { photoShoots: PhotoShoot[
           />
           <ChevronRight
             size={20}
-            className={`invert-blend hidden md:block pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 transition-opacity duration-300 ${canScroll[shootIndex] ? 'opacity-100' : 'opacity-0'}`}
+            className={`hidden md:block pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 transition-opacity duration-300 text-white drop-shadow-[0_1px_6px_rgba(0,0,0,0.5)] ${canScroll[shootIndex] ? 'opacity-100' : 'opacity-0'}`}
           />
         </section>
       ))}

@@ -14,16 +14,30 @@ async function getLinks(): Promise<{ title: string; href: string }[]> {
   try {
     const res = await fetch(GOOGLE_SHEET_CSV_URL, { next: { revalidate: 3600 } })
     const text = await res.text()
+    const unquote = (s: string) => {
+      const t = s.trim()
+      return t.startsWith('"') && t.endsWith('"') ? t.slice(1, -1).replace(/""/g, '"') : t
+    }
     return text
       .replace(/\r\n/g, '\n')
       .split('\n')
       .map((line) => line.trim())
       .filter(Boolean)
       .map((line) => {
+        // Handle quoted first field (e.g. "Title with, comma",url)
+        if (line.startsWith('"')) {
+          const closeQuote = line.indexOf('",')
+          if (closeQuote !== -1) {
+            return {
+              title: line.slice(1, closeQuote).replace(/""/g, '"'),
+              href: unquote(line.slice(closeQuote + 2)),
+            }
+          }
+        }
         const comma = line.indexOf(',')
         return {
-          title: line.slice(0, comma).trim(),
-          href: line.slice(comma + 1).trim(),
+          title: unquote(line.slice(0, comma)),
+          href: unquote(line.slice(comma + 1)),
         }
       })
       .filter((link) => link.title && link.href)
